@@ -32,5 +32,9 @@ app.get('/api', (req, res) => {
 	return res.status(200).send({'message': 'Phi Grade API'});
 });
 
+// app.use('/api/users/', usersRouter);
+// app.use('/api/auth/', authRouter);
+// app.use('/api/grades/', gradesRouter);
+
 app.listen(process.env.PORT);
 console.log('app running on port ', process.env.PORT);
