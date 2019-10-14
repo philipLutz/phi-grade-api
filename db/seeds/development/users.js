@@ -1,8 +1,8 @@
 const data = require('../seedData/createData.js');
 
 exports.seed = function(knex) {
-  return knex('grades').del()
+  return knex('users').del()
     .then(function() {
-      return knex('grades').insert(data.grades);
+      return knex('users').insert(data.users);
     });
 };
