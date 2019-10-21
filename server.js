@@ -4,7 +4,7 @@ const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const gradesRouter = require('./routes/grades.js');
-// const usersRouter = require('./routes/users.js');
+const usersRouter = require('./routes/users.js');
 
 const app = express();
 
@@ -34,7 +34,7 @@ app.get('/api', (req, res) => {
 	return res.status(200).send({'message': 'Phi Grade API'});
 });
 
-// app.use('/api/users', usersRouter);
+app.use('/api/users', usersRouter);
 app.use('/api/grades', gradesRouter);
 
 app.listen(process.env.PORT);

@@ -14,7 +14,7 @@ function getSingleUser(userId) {
 }
 
 function addUser(user) {
-	return Users().insert(user, 'user_id');
+	return Users().insert(user);
 }
 
 function updateUser(userId, updates) {
