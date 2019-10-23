@@ -3,8 +3,8 @@ require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-const gradesRouter = require('./routes/grades.js');
-const usersRouter = require('./routes/users.js');
+const gradesRouter = require('./routes/gradesRouter.js');
+const usersRouter = require('./routes/usersRouter.js');
 
 const app = express();
 
