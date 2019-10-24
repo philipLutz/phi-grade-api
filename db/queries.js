@@ -13,6 +13,10 @@ function getSingleUser(userId) {
   return Users().where('user_id', userId).first();
 }
 
+function getUserEmail(email) {
+	return Users().where('email', email).first();
+}
+
 function addUser(user) {
 	return Users().insert(user);
 }
@@ -58,6 +62,7 @@ function deleteGrade(gradeId) {
 module.exports = {
 	getAllUsers: getAllUsers,
 	getSingleUser: getSingleUser,
+	getUserEmail: getUserEmail,
 	addUser: addUser,
 	updateUser: updateUser,
 	deleteUser: deleteUser,

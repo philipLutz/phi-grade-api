@@ -13,9 +13,9 @@ const Auth = {
 	isValidEmail(email) {
 		return /\S+@\S+\.\S+/.test(email);
 	},
-	generateToken(userId) {
+	generateToken(user_id) {
 		const token = jwt.sign({
-			userId: userId
+			user_id: user_id
 		},
 			process.env.SECRET, {expiresIn: '1d'}
 		);
