@@ -31,7 +31,7 @@ const User = {
 				}];
 				queries.addUser(user)
 				.then(function() {
-					res.status(200).send({'message': 'User successfully registered'});
+					res.status(201).send({'message': 'User successfully registered'});
 				})
 				.catch(function(error) {
 					next(error);
@@ -61,27 +61,56 @@ const User = {
 		.catch(function(error) {
 			next(error);
 		})
+	},
+	getSingleUser(req, res, next) {
+		queries.getSingleUser(req.params.user_id)
+		.then(function(user) {
+			if (!user.private) {
+				const publicUserInfo = {
+					user_id: user.user_id,
+					first_name: user.first_name,
+					last_name: user.last_name,
+					bio: user.bio
+				}
+				return res.status(200).send(publicUserInfo);
+			}	else {
+				return res.status(401).send({'message':'The information for this user is private'});
+			}
+		})
+		.catch(function(error) {
+			next(error);
+		})
+	},
+	update(req, res, next) {
+		queries.getSingleUser(req.user.user_id)
+		.then(function(user) {
+			const updates = {
+				first_name: req.body.first_name || user.first_name,
+				last_name: req.body.last_name || user.last_name,
+				bio: req.body.bio || user.bio,
+				modified_date: moment(new Date())
+			};
+			queries.updateUser(user.user_id, updates)
+			.then(function() {
+				return res.status(200).send({'message':'User successfully updated'});
+			})
+			.catch(function(error) {
+				next(error);
+			})
+		})
+		.catch(function(error) {
+			next(error);
+		})
+	},
+	delete(req, res, next) {
+		queries.deleteUser(req.params.user_id)
+		.then(function() {
+			return res.status(204).send({'message':'User successfully deleted'});
+		})
+		.catch(function(error) {
+			next(error)
+		})
 	}
-
-
-
-
-
-	// getAllUsers(req, res, next) {
-
-	// }
-	// getSingleUser(req, res, next) {
-	// 	queries.getSingleUser(user_id)
-	// 	.then(function(user) {
-
-	// 	})
-	// },
-	// update(req, res, next) {
-
-	// },
-	// delete(req, res, next) {
-
-	// }
 }
 
 module.exports = User;

@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
-const knex = require('../db/knex.js');
+// const knex = require('../db/knex.js');
+const queries = require('../db/queries.js');
 
 const Auth = {
 	hashPassword(password) {
@@ -21,22 +22,20 @@ const Auth = {
 		);
 		return token;
 	},
-	async verifyToken(req, res, next) {
+	verifyToken(req, res, next) {
 		const token = req.headers['x-access-token'];
 		if (!token) {
 			return res.status(400).send({ 'message': 'Token is not provided' });
 		}
-		try {
-			const decoded = await jwt.verify(token, process.env.SECRET);
-			const {rows} = await knex('users').where({user_id: decoded.userId}).first();
-			if (!rows[0]) {
-				return res.status(400).send({ 'message': 'The token you provided is invalid' });
-			}
-			req.user = {id: decoded.userId};
+		const decodedToken = jwt.verify(token, process.env.SECRET);
+		queries.getSingleUser(decodedToken.user_id)
+		.then(function(user) {
+			req.user = {user_id: decodedToken.user_id};
 			next();
-		}	catch(error) {
-			return res.status(400).send(error);
-		}
+		})
+		.catch(function(error) {
+			next(error);
+		})
 	}
 }
 

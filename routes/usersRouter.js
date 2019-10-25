@@ -7,10 +7,10 @@ router.post('/register', User.register);
 
 router.post('/login', User.login);
 
-// router.get('/:user_id', Auth.verifyToken, User.getSingleUser);
+router.get('/:user_id', Auth.verifyToken, User.getSingleUser);
 
-// router.put('/:user_id', Auth.verifyToken, User.update);
+router.put('/', Auth.verifyToken, User.update);
 
-// router.delete('/:user_id', Auth.verifyToken, User.delete);
+router.delete('/:user_id', Auth.verifyToken, User.delete);
 
 module.exports = router;

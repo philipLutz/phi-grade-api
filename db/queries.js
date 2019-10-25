@@ -9,8 +9,8 @@ function getAllUsers() {
 	return Users().select();
 }
 
-function getSingleUser(userId) {
-  return Users().where('user_id', userId).first();
+function getSingleUser(user_id) {
+  return Users().where('user_id', user_id).first();
 }
 
 function getUserEmail(email) {
@@ -21,12 +21,12 @@ function addUser(user) {
 	return Users().insert(user);
 }
 
-function updateUser(userId, updates) {
-	return Users().where('user_id', userId).update(updates);
+function updateUser(user_id, updates) {
+	return Users().where('user_id', user_id).update(updates);
 }
 
-function deleteUser(userId) {
-	return Users().where('user_id', userId).del();
+function deleteUser(user_id) {
+	return Users().where('user_id', user_id).del();
 }
 
 // Grades
@@ -38,24 +38,24 @@ function getAllGrades() {
 	return Grades().select();
 }
 
-function getAllUserGrades(userId) {
-	return Grades().where('user_id', userId);
+function getAllUserGrades(user_id) {
+	return Grades().where('user_id', user_id);
 }
 
-function getSingleGrade(gradeId) {
-	return Grades().where('grade_id', gradeId).first();
+function getSingleGrade(grade_id) {
+	return Grades().where('grade_id', grade_id).first();
 }
 
 function addGrade(grade) {
-	return Grades().insert(grade, 'grade_id');
+	return Grades().insert(grade);
 }
 
-function updateGrade(gradeId, updates) {
-	return Grades().where('grade_id', gradeId).update(updates);
+function updateGrade(grade_id, updates) {
+	return Grades().where('grade_id', grade_id).update(updates);
 }
 
-function deleteGrade(gradeId) {
-	return Grades().where('grade_id', gradeId).del();
+function deleteGrade(grade_id) {
+	return Grades().where('grade_id', grade_id).del();
 }
 
 
