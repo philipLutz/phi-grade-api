@@ -16,8 +16,8 @@ let users = [];
 for (let i=0; i<6; i++) {
 	let user = {
 		user_id: uuidv4(),
-		email: makeString(128),
-		password: makeString(128),
+		email: makeString(10) + '@gmail.com',
+		password: makeString(7),
 		first_name: makeString(32),
 		last_name: makeString(32),
 		bio: makeString(256),
@@ -30,8 +30,8 @@ for (let i=0; i<6; i++) {
 
 let grades = [];
 for (let i=0; i<6; i++) {
-	const exampleString = makeString(20);
-	const randomIndex = Math.floor(Math.random() * 7);
+	const exampleString = makeString(60);
+	const randomIndex = Math.floor(Math.random() * 6);
 	const randomUserId = users[randomIndex].user_id;
 	let grade = {
 		grade_id: uuidv4(),
