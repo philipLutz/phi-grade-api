@@ -37,5 +37,31 @@ app.get('/api', (req, res) => {
 app.use('/api/users', usersRouter);
 app.use('/api/grades', gradesRouter);
 
+app.use(function(req, res, next) {
+  const error = new Error('Not Found');
+  error.status = 404;
+  next(error);
+});
+
+if (app.get('env') === 'development') {
+  app.use(function(error, req, res, next) {
+    res.status(error.status || 500);
+    res.json({
+      message: error.message,
+      error: error
+    });
+  });
+}
+
+app.use(function(error, req, res, next) {
+  res.status(error.status || 500);
+  res.json({
+    message: error.message,
+    error: {}
+  });
+});
+
 app.listen(process.env.PORT);
 console.log('app running on port ', process.env.PORT);
+
+module.exports = app;
