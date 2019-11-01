@@ -169,21 +169,21 @@ describe('User Routes', function() {
 		   					testUserId = users[i].user_id;
 		   				}
 		   			}
-		   			// Our first request will be made from a non admin user and it should fail
+		   			// First request will be made from a non admin user and it should fail
 		   			testToken = Auth.generateToken(testUserId);
 		   			chai.request(app)
 		   			.delete(`/api/users/${adminId}`)
 		   			.set({'x-access-token': testToken})
 		   			.then(function(res) {
-		   				// Res should be undefined because we are purposely making a bad request
+		   				// Res should be caught as an error because we are purposely making a bad request
 		   			})
 		   			.catch(function(res) {
-		   				console.log(res.body);
 		   				res.should.have.status(401);
 		   				res.body.should.be.a('object');
 						res.body.should.have.property('message');
 						res.body.message.should.equal('You do not have access to delete users');
 		   			})
+		   			// Second request will be made from admin and it should succeed
 		   			.then(function() {
 		   				testToken = Auth.generateToken(adminId);
 		   				chai.request(app)
