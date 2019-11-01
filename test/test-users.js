@@ -91,44 +91,30 @@ describe('User Routes', function() {
 
 	describe('GET /api/users/:user_id', function() {
 		it('should return user information', function(done) {
-			let testToken = Auth.verifyToken({
-				email: ''
-			});
+			let testToken = null;
 			let testUserId = null;
+			queries.getAllUsers()
+			.then(function(users) {
+				testUserId = users[0].user_id;
+				testToken = Auth.generateToken(testUserId);
+				chai.request(app)
+				.get(`/api/users/${testUserId}`)
+				.set({'x-access-token': testToken})
+				.end(function(err, res) {
+					res.should.have.status(200);
+					res.body.should.be.a('object');
+					res.body.should.have.property('user_id');
+					res.body.user_id.should.equal(testUserId);
+					res.body.should.have.property('first_name');
+					res.body.should.have.property('last_name');
+					res.body.should.have.property('bio');
+					done();
+				});
+			});
+		});
+	});
 
-			chai.request(app)
-			// .post('/api/users/login')
-			// .send({
-			// 	email: 'testUser@gmail.com',
-			// 	password: '12345'
-			// })
-			// .then(function(err, res) {
-			// 	res.should.have.status(200);
-			// 	res.body.should.be.a('object');
-			// 	res.body.should.have.property('token');
-			// 	res.body.token.should.be.a('string');
-			// 	testToken = res.body.token;
-			// })
-			// .then(function() {
-			// 	queries.getAllUsers()
-			// 	.then(function(users) {
-			// 		testUserId = users[0].user_id;
-			// 	})
-			// })
-			.get(`/api/users/${testUserId}`)
-			.set({'x-access-token': testToken})
-			.end(function(err, res) {
-				res.should.have.status(200);
-				res.body.be.a('object');
-				res.body.should.have.property('user_id');
-				res.body.user_id.should.equal(testUserId);
-				res.body.should.have.property('first_name');
-				res.body.should.have.property('last_name');
-				res.body.should.have.property('bio');
-				done();
-			})
-		})
-	})
+	
 
 
 

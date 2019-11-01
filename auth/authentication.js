@@ -1,7 +1,7 @@
+"use strict";
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
-// const knex = require('../db/knex.js');
 const queries = require('../db/queries.js');
 
 const Auth = {
@@ -18,7 +18,7 @@ const Auth = {
 		const token = jwt.sign({
 			user_id: user_id
 		},
-			process.env.SECRET, {expiresIn: '1d'}
+			process.env.SECRET, {expiresIn: process.env.EXPIRY}
 		);
 		return token;
 	},

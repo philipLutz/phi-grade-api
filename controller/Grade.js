@@ -1,3 +1,4 @@
+"use strict";
 const express = require('express');
 const moment = require('moment');
 const uuidv4 = require('uuid/v4');
