@@ -26,6 +26,7 @@ const User = {
 					last_name: req.body.last_name,
 					bio: req.body.bio,
 					private: req.body.private,
+					admin: false,
 					created_date: moment(new Date()),
 					modified_date: moment(new Date())
 				}];
@@ -92,7 +93,7 @@ const User = {
 			};
 			queries.updateUser(user.user_id, updates)
 			.then(function() {
-				return res.status(200).send({'message':'User successfully updated'});
+				return res.status(200).send({'message':'User information successfully updated'});
 			})
 			.catch(function(error) {
 				next(error);
@@ -103,13 +104,18 @@ const User = {
 		})
 	},
 	delete(req, res, next) {
-		queries.deleteUser(req.params.user_id)
-		.then(function() {
-			return res.status(204).send({'message':'User successfully deleted'});
-		})
-		.catch(function(error) {
-			next(error)
-		})
+		if (req.user.admin === true) {
+			queries.deleteUser(req.params.user_id)
+			.then(function() {
+				return res.status(204).send({'message':'User successfully deleted'});
+			})
+			.catch(function(error) {
+				next(error)
+			})
+		}	else {
+			return res.status(401).send({'message': 'You do not have access to delete users'});
+		}
+		
 	}
 }
 

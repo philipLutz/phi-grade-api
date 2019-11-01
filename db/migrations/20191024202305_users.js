@@ -7,6 +7,7 @@ exports.up = function(knex) {
      	last_name VARCHAR(32) NOT NULL,
   		bio VARCHAR(256),
   		private BOOLEAN NOT NULL,
+      admin BOOLEAN NOT NULL,
   		created_date TIMESTAMP,
   		modified_date TIMESTAMP
   	)`;

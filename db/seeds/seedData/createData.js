@@ -22,6 +22,7 @@ for (let i=0; i<6; i++) {
 		last_name: makeString(32),
 		bio: makeString(256),
 		private: false,
+		admin: false,
 		created_date: moment(new Date()),
 		modified_date: moment(new Date())
 	}

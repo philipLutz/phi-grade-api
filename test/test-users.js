@@ -12,8 +12,6 @@ const should = chai.should();
 
 chai.use(chaiHttp);
 
-
-
 describe('User Routes', function() {
 
 	// Setup tables and register a test user
@@ -31,6 +29,7 @@ describe('User Routes', function() {
 					last_name: 'User',
 					bio: 'Test Bio',
 					private: 'false',
+					admin: 'false',
 					created_date: moment(new Date()),
 					modified_date: moment(new Date())
 		    	}];
@@ -71,6 +70,65 @@ describe('User Routes', function() {
 			});
 		});
 	});
+
+	describe('POST /api/users/login', function() {
+		it('should login a user', function(done) {
+			chai.request(app)
+			.post('/api/users/login')
+			.send({
+				email: 'testUser@gmail.com',
+				password: '12345'
+			})
+			.end(function(err, res) {
+				res.should.have.status(200);
+				res.body.should.be.a('object');
+				res.body.should.have.property('token');
+				res.body.token.should.be.a('string');
+				done();
+			});
+		});
+	});
+
+	describe('GET /api/users/:user_id', function() {
+		it('should return user information', function(done) {
+			let testToken = Auth.verifyToken({
+				email: ''
+			});
+			let testUserId = null;
+
+			chai.request(app)
+			// .post('/api/users/login')
+			// .send({
+			// 	email: 'testUser@gmail.com',
+			// 	password: '12345'
+			// })
+			// .then(function(err, res) {
+			// 	res.should.have.status(200);
+			// 	res.body.should.be.a('object');
+			// 	res.body.should.have.property('token');
+			// 	res.body.token.should.be.a('string');
+			// 	testToken = res.body.token;
+			// })
+			// .then(function() {
+			// 	queries.getAllUsers()
+			// 	.then(function(users) {
+			// 		testUserId = users[0].user_id;
+			// 	})
+			// })
+			.get(`/api/users/${testUserId}`)
+			.set({'x-access-token': testToken})
+			.end(function(err, res) {
+				res.should.have.status(200);
+				res.body.be.a('object');
+				res.body.should.have.property('user_id');
+				res.body.user_id.should.equal(testUserId);
+				res.body.should.have.property('first_name');
+				res.body.should.have.property('last_name');
+				res.body.should.have.property('bio');
+				done();
+			})
+		})
+	})
 
 
 

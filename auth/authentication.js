@@ -30,7 +30,10 @@ const Auth = {
 		const decodedToken = jwt.verify(token, process.env.SECRET);
 		queries.getSingleUser(decodedToken.user_id)
 		.then(function(user) {
-			req.user = {user_id: decodedToken.user_id};
+			req.user = {
+				user_id: decodedToken.user_id, 
+				admin: user.admin
+			};
 			next();
 		})
 		.catch(function(error) {
