@@ -91,7 +91,7 @@ const Grade = {
 			if (req.user.user_id === grade.user_id) {
 				queries.deleteGrade(req.params.grade_id)
 				.then(function() {
-					return res.status(204).send({'message':'Grade successfully deleted'});
+					return res.status(200).send({'message':'Grade successfully deleted'});
 				})
 				.catch(function(error) {
 					next(error);

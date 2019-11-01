@@ -90,7 +90,7 @@ describe('User Routes', function() {
 	});
 
 	describe('GET /api/users/:user_id', function() {
-		it('should return user information', function(done) {
+		it('should return public information of a specific user', function(done) {
 			let testToken = null;
 			let testUserId = null;
 			queries.getAllUsers()
@@ -106,20 +106,99 @@ describe('User Routes', function() {
 					res.body.should.have.property('user_id');
 					res.body.user_id.should.equal(testUserId);
 					res.body.should.have.property('first_name');
+					res.body.first_name.should.equal('Test');
 					res.body.should.have.property('last_name');
+					res.body.last_name.should.equal('User');
 					res.body.should.have.property('bio');
+					res.body.bio.should.equal('Test Bio');
 					done();
 				});
 			});
 		});
 	});
 
-	
+	describe('PUT /api/users/', function() {
+		it('should update the information of the user making the request', function(done) {
+			let testToken = null;
+			let testUserId = null;
+			queries.getAllUsers()
+			.then(function(users) {
+				testUserId = users[0].user_id;
+				testToken = Auth.generateToken(testUserId);
+				chai.request(app)
+				.put('/api/users/')
+				.set({'x-access-token': testToken})
+				.send({
+					bio: 'I modified my bio to have more words'
+				})
+				.end(function(err, res) {
+					res.should.have.status(200);
+					res.body.should.be.a('object');
+					res.body.should.have.property('message');
+					res.body.message.should.equal('User information successfully updated');
+					done();
+				});
+			});
+		});
+	});
 
-
-
-
-
-
-
+	describe('DELETE /api/users/:user_id', function() {
+		it('should only allow an admin to delete a user', function(done) {
+			const hashPassword = Auth.hashPassword('12345');
+		    const testAdminUser = [{
+		   		user_id: uuidv4(),
+				email: 'testAdminUser@gmail.com',
+				password: hashPassword,
+				first_name: 'Test',
+				last_name: 'Admin',
+				bio: 'Test Bio',
+				private: 'false',
+				admin: 'true',
+				created_date: moment(new Date()),
+				modified_date: moment(new Date())
+		    }];
+		    const adminId = testAdminUser[0].user_id;
+		    queries.addUser(testAdminUser)
+		   	.then(function(done) {
+		   		let testToken = null;
+		   		let testUserId = null;
+		   		queries.getAllUsers()
+		   		.then(function(users) {
+		   			for (let i=0; i<users.length; i++) {
+		   				if (users[i].admin === false) {
+		   					testUserId = users[i].user_id;
+		   				}
+		   			}
+		   			// Our first request will be made from a non admin user and it should fail
+		   			testToken = Auth.generateToken(testUserId);
+		   			chai.request(app)
+		   			.delete(`/api/users/${adminId}`)
+		   			.set({'x-access-token': testToken})
+		   			.then(function(res) {
+		   				// Res should be undefined because we are purposely making a bad request
+		   			})
+		   			.catch(function(res) {
+		   				console.log(res.body);
+		   				res.should.have.status(401);
+		   				res.body.should.be.a('object');
+						res.body.should.have.property('message');
+						res.body.message.should.equal('You do not have access to delete users');
+		   			})
+		   			.then(function() {
+		   				testToken = Auth.generateToken(adminId);
+		   				chai.request(app)
+		   				.delete(`/api/users/${testUserId}`)
+		   				.set({'x-access-token': testToken})
+		   				.end(function(err, res) {
+		   					res.should.have.status(200);
+		   					res.body.should.be.a('object');
+							res.body.should.have.property('message');
+							res.body.message.should.equal('User successfully deleted');
+		   				});
+		   			});
+		   		});
+		   	});
+		   	done();
+		});
+	});
 });

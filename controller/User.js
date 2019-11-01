@@ -108,7 +108,7 @@ const User = {
 		if (req.user.admin === true) {
 			queries.deleteUser(req.params.user_id)
 			.then(function() {
-				return res.status(204).send({'message':'User successfully deleted'});
+				return res.status(200).send({'message':'User successfully deleted'});
 			})
 			.catch(function(error) {
 				next(error)
