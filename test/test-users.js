@@ -126,7 +126,7 @@ describe('User Routes', function() {
 				testUserId = users[0].user_id;
 				testToken = Auth.generateToken(testUserId);
 				chai.request(app)
-				.put('/api/users/')
+				.put('/api/users')
 				.set({'x-access-token': testToken})
 				.send({
 					bio: 'I modified my bio to have more words'
