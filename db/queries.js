@@ -46,6 +46,10 @@ function getSingleGrade(encrypted_string) {
 	return Grades().where('encrypted_string', encrypted_string).first();
 }
 
+function getSingleGradeId(grade_id) {
+	return Grades().where('grade_id', grade_id).first();
+}
+
 function addGrade(grade) {
 	return Grades().insert(grade);
 }
@@ -69,6 +73,7 @@ module.exports = {
 	getAllGrades: getAllGrades,
 	getAllUserGrades: getAllUserGrades,
 	getSingleGrade: getSingleGrade,
+	getSingleGradeId: getSingleGradeId,
 	addGrade: addGrade,
 	updateGrade: updateGrade,
 	deleteGrade: deleteGrade

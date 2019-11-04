@@ -25,7 +25,7 @@ const Grade = {
 		})
 	},
 	getSingleGrade(req, res, next) {
-		queries.getSingleGrade(req.params.encrypted_string)
+		queries.getSingleGrade(req.body.encrypted_string)
 		.then(function(grade) {
 			return res.status(200).send(grade);
 		})
@@ -59,7 +59,7 @@ const Grade = {
 		if (!req.body.decrypted_string) {
 			return res.status(400).send({'message': 'Some values are missing'});
 		}	else {
-			queries.getSingleGrade(req.params.grade_id)
+			queries.getSingleGradeId(req.params.grade_id)
 			.then(function(grade) {
 				if (req.user.user_id === grade.user_id) {
 					const encrypted_string = Auth.hashPassword(req.body.decrypted_string);
@@ -82,6 +82,7 @@ const Grade = {
 			})
 			.catch(function(error) {
 				next(error);
+				// return res.json(error);
 			})
 		}
 	},

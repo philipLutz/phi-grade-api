@@ -280,86 +280,32 @@ describe('Grade Routes', function() {
 		});
 	});
 
-	// I don't know why this test fails inconsistently?
-	describe('GET /api/grades/one/:encrypted_string', function() {
+	describe('GET /api/grades/one', function() {
 		it('should return a specific grade to an authenticated user', function(done) {
-			// const fakeString = Auth.hashPassword('fakeString');
-			// chai.request(app)
-			// .get(`/api/grades/one/${fakeString}`)
-			// .then(function(res) {
-			// 	// This should be an error going to .catch()
-			// })
-			// .catch(function(err) {})
-			// .then(function() {
-			// 	let testToken = null;
-			// 	queries.getAllUsers()
-			// 	.then(function(users) {
-			// 		for (let i=0; i<users.length; i++) {
-			// 			if (users[i].email === 'testUser@gmail.com') {
-			// 				testToken = Auth.generateToken(users[i].user_id);
-			// 			}
-			// 		}
-			// 	})
-			// 	.then(function() {
-			// 		let testString = null;
-			// 		queries.getAllGrades()
-			// 		.then(function(grades) {
-			// 			testString = grades[0].encrypted_string;
-			// 		})
-			// 		.then(function() {
-			// 			chai.request(app)
-			// 			.get(`/api/grades/one/${testString}`)
-			// 			.set({'x-access-token': testToken})
-			// 			.end(function(err, res) {
-			// 				res.should.have.status(200);
-			// 				res.body.should.be.a('object');
-			// 				res.body.should.have.property('grade_id');
-			// 				res.body.grade_id.should.be.a('string');
-			// 				res.body.should.have.property('user_id');
-			// 				res.body.user_id.should.be.a('string');
-			// 				res.body.should.have.property('decrypted_string');
-			// 				res.body.decrypted_string.should.be.a('string');
-			// 				res.body.should.have.property('encrypted_string');
-			// 				res.body.encrypted_string.should.equal(testString);
-			// 				done();
-			// 			});
-			// 		});
-			// 	});
-			// });
-			queries.getAllUsers()
-			.then(function(users) {
-				for (let i=0; i<users.length; i++) {
-					if (users[i].email === 'testUser@gmail.com') {
-						testToken = Auth.generateToken(users[i].user_id);
-						testId = users[i].user_id;
-					}
-				}
-				const decrypted_string = "12345";
-				const encrypted_string = Auth.hashPassword(decrypted_string);
-				const testGrade = [{
-					grade_id: uuidv4(),
-					user_id: testId,
-					decrypted_string: decrypted_string,
-					encrypted_string: encrypted_string,
-					created_date: moment(new Date()),
-					modified_date: moment(new Date())
-				}];
-				queries.addGrade(testGrade)
-				.then(function() {
+			queries.getUserEmail('testUser@gmail.com')
+			.then(function(user) {
+				const testToken = Auth.generateToken(user.user_id);
+				const testId = user.user_id;
+				queries.getAllGrades()
+				.then(function(grades) {
+					const testGrade = grades[0];
 					chai.request(app)
-					.get(`/api/grades/one/${encrypted_string}`)
+					.get(`/api/grades/one`)
 					.set({'x-access-token': testToken})
+					.send({
+						encrypted_string: testGrade.encrypted_string
+					})
 					.end(function(err, res) {
 						res.should.have.status(200);
 						res.body.should.be.a('object');
 						res.body.should.have.property('grade_id');
-						res.body.grade_id.should.be.a('string');
+						res.body.grade_id.should.be.equal(testGrade.grade_id);
 						res.body.should.have.property('user_id');
-						res.body.user_id.should.equal(testId);
+						res.body.user_id.should.equal(testGrade.user_id);
 						res.body.should.have.property('decrypted_string');
-						res.body.decrypted_string.should.equal(decrypted_string);
+						res.body.decrypted_string.should.equal(testGrade.decrypted_string);
 						res.body.should.have.property('encrypted_string');
-						res.body.encrypted_string.should.equal(encrypted_string);
+						res.body.encrypted_string.should.equal(testGrade.encrypted_string);
 						done();
 					})
 				})
@@ -381,14 +327,10 @@ describe('Grade Routes', function() {
 			.then(function() {
 				let testToken = null;
 				let testId = null;
-				queries.getAllUsers()
-				.then(function(users) {
-					for (let i=0; i<users.length; i++) {
-						if (users[i].email === 'testUser@gmail.com') {
-							testToken = Auth.generateToken(users[i].user_id);
-							testId = users[i].user_id;
-						}
-					}
+				queries.getUserEmail('testUser@gmail.com')
+				.then(function(user) {
+					testToken = Auth.generateToken(user.user_id);
+					testId = user.user_id;
 					const decrypted_string = "12345";
 					const encrypted_string = Auth.hashPassword(decrypted_string);
 					const testGrade = [{
@@ -453,11 +395,42 @@ describe('Grade Routes', function() {
 		});
 	});
 
-	// describe('PUT /api/grades/:grade_id', function() {
-	// 	it('should update a grade of the user making the request', function(done) {
-
-	// 	});
-	// });
+	describe('PUT /api/grades/:grade_id', function() {
+		it('should update a grade of the user making the request', function(done) {
+			queries.getUserEmail('testUser@gmail.com')
+			.then(function(user) {
+				const testToken = Auth.generateToken(user.user_id);
+				const testId = user.user_id;
+				const decrypted_string = "12345";
+				const encrypted_string = Auth.hashPassword(decrypted_string);
+				const testGrade = [{
+					grade_id: uuidv4(),
+					user_id: testId,
+					decrypted_string: decrypted_string,
+					encrypted_string: encrypted_string,
+					created_date: moment(new Date()),
+					modified_date: moment(new Date())
+				}];
+				const gradeId = testGrade[0].grade_id;
+				queries.addGrade(testGrade)
+				.then(function() {
+					chai.request(app)
+					.put(`/api/grades/${gradeId}`)
+					.set({'x-access-token': testToken})
+					.send({
+						decrypted_string: "54321"
+					})
+					.end(function(err, res) {
+						res.should.have.status(200);
+						res.body.should.be.a('object');
+						res.body.should.have.property('message');
+						res.body.message.should.equal('Grade successfully updated');
+						done();
+					});
+				});
+			});
+		});
+	});
 
 	// describe('DELETE /api/grades/:grade_id', function() {
 	// 	it('should delete a grade of the user making the request', function(done) {
