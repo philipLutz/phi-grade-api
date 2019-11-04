@@ -42,8 +42,8 @@ function getAllUserGrades(user_id) {
 	return Grades().where('user_id', user_id);
 }
 
-function getSingleGrade(grade_id) {
-	return Grades().where('grade_id', grade_id).first();
+function getSingleGrade(encrypted_string) {
+	return Grades().where('encrypted_string', encrypted_string).first();
 }
 
 function addGrade(grade) {
