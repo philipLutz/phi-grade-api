@@ -82,12 +82,11 @@ const Grade = {
 			})
 			.catch(function(error) {
 				next(error);
-				// return res.json(error);
 			})
 		}
 	},
 	delete(req, res, next) {
-		queries.getSingleGrade(req.params.grade_id)
+		queries.getSingleGradeId(req.params.grade_id)
 		.then(function(grade) {
 			if (req.user.user_id === grade.user_id) {
 				queries.deleteGrade(req.params.grade_id)

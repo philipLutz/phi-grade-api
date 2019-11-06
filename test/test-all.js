@@ -13,44 +13,53 @@ const should = chai.should();
 chai.use(chaiHttp);
 
 describe('User Routes', function() {
-
-	// Setup tables and register a test user
-	beforeEach(function(done) {
+	beforeEach(function(done) { // Setup tables and register a test user
 	    knex.migrate.rollback()
 	    .then(function() {
 	    	knex.migrate.latest()
 	    	.then(function() {
-	    		const hashPassword = Auth.hashPassword('12345');
-		    	const testUser = [{
-		    		user_id: uuidv4(),
-					email: 'testUser@gmail.com',
-					password: hashPassword,
-					first_name: 'Test',
-					last_name: 'User',
-					bio: 'Test Bio',
-					private: 'false',
-					admin: 'false',
-					created_date: moment(new Date()),
-					modified_date: moment(new Date())
-		    	}];
-		    	queries.addUser(testUser)
-		    	.then(function() {
-		    		done();
-		    	})
-	    	})
-	    })
+	    		knex.seed.run()
+	    		.then(function() {
+	    			const hashPassword = Auth.hashPassword('12345');
+			    	const testUser = [{
+			    		user_id: uuidv4(),
+						email: 'testUser@gmail.com',
+						password: hashPassword,
+						first_name: 'Test',
+						last_name: 'User',
+						bio: 'Test Bio',
+						private: 'false',
+						admin: 'false',
+						created_date: moment(new Date()),
+						modified_date: moment(new Date())
+			    	}];
+			    	queries.addUser(testUser)
+			    	.then(function() {
+			    		done();
+			    	});
+		    	});
+	    	});
+	    });
 	});
-
-	// Clear tables
-	afterEach(function(done) {
+	afterEach(function(done) { // Clear tables
 	    knex.migrate.rollback()
 	    .then(function() {
 	      done();
 	    });
 	});
-
 	describe('POST /api/users/register', function() {
 		it('should register a new user', function(done) {
+			chai.request(app)
+			.post('/api/users/register')
+			.send({
+				email: 'testUser@gmail.com',
+				password: '1234512345',
+				first_name: 'Phil',
+				last_name: 'Lutz',
+				bio: 'This is my bio',
+				private: 'false'
+			})
+			.then(function(res) {}) // This is an intentional error
 			chai.request(app)
 			.post('/api/users/register')
 			.send({
@@ -70,9 +79,15 @@ describe('User Routes', function() {
 			});
 		});
 	});
-
 	describe('POST /api/users/login', function() {
 		it('should login a user', function(done) {
+			chai.request(app)
+			.post('/api/users/login')
+			.send({
+				email: 'testUser@gmail.com',
+				password: '123'
+			})
+			.then(function(res) {}) // This is an intentional error
 			chai.request(app)
 			.post('/api/users/login')
 			.send({
@@ -88,15 +103,27 @@ describe('User Routes', function() {
 			});
 		});
 	});
-
 	describe('GET /api/users/:user_id', function() {
-		it('should return public information of a specific user', function(done) {
-			let testToken = null;
-			let testUserId = null;
+		it('should return public information of a specific user to an authenticated user', function(done) {
 			queries.getAllUsers()
 			.then(function(users) {
-				testUserId = users[0].user_id;
-				testToken = Auth.generateToken(testUserId);
+				let testUserId = null;
+				let anotherUserId = null;
+				let testToken = null;
+				for (let i=0; i<users.length; i++) {
+					if (users[i].email === 'testUser@gmail.com') {
+						testUserId = users[i].user_id;
+					}	else {
+						anotherUserId = users[i].user_id;
+						testToken = Auth.generateToken(anotherUserId);
+					}
+					if (anotherUserId !== null && testToken !== null && testUserId !== null) {
+						break;
+					}
+				}
+				chai.request(app)
+				.get(`/api/users/${testUserId}`)
+				.then(function(res) {}) // This is an intentional error
 				chai.request(app)
 				.get(`/api/users/${testUserId}`)
 				.set({'x-access-token': testToken})
@@ -116,15 +143,18 @@ describe('User Routes', function() {
 			});
 		});
 	});
-
 	describe('PUT /api/users/', function() {
 		it('should update the information of the user making the request', function(done) {
-			let testToken = null;
-			let testUserId = null;
+			chai.request(app)
+			.put('/api/users')
+			.send({
+				bio: 'There is no user associated with this request so it should fail'
+			})
+			.then(function(res) {}) // This is an intentional error
 			queries.getAllUsers()
 			.then(function(users) {
-				testUserId = users[0].user_id;
-				testToken = Auth.generateToken(testUserId);
+				const testUserId = users[0].user_id;
+				const testToken = Auth.generateToken(testUserId);
 				chai.request(app)
 				.put('/api/users')
 				.set({'x-access-token': testToken})
@@ -141,7 +171,6 @@ describe('User Routes', function() {
 			});
 		});
 	});
-
 	describe('DELETE /api/users/:user_id', function() {
 		it('should only allow an admin to delete a user', function(done) {
 			const hashPassword = Auth.hashPassword('12345');
@@ -159,7 +188,7 @@ describe('User Routes', function() {
 		    }];
 		    const adminId = testAdminUser[0].user_id;
 		    queries.addUser(testAdminUser)
-		   	.then(function(done) {
+		   	.then(function() {
 		   		let testToken = null;
 		   		let testUserId = null;
 		   		queries.getAllUsers()
@@ -169,43 +198,29 @@ describe('User Routes', function() {
 		   					testUserId = users[i].user_id;
 		   				}
 		   			}
-		   			// First request will be made from a non admin user and it should fail
 		   			testToken = Auth.generateToken(testUserId);
 		   			chai.request(app)
 		   			.delete(`/api/users/${adminId}`)
 		   			.set({'x-access-token': testToken})
-		   			.then(function(res) {
-		   				// Res should be caught as an error because we are purposely making a bad request
-		   			})
-		   			.catch(function(res) {
-		   				res.should.have.status(401);
+		   			.then(function(res) {}) // This is an intentional error
+		   			testToken = Auth.generateToken(adminId);
+		   			chai.request(app)
+		   			.delete(`/api/users/${testUserId}`)
+		   			.set({'x-access-token': testToken})
+		  			.end(function(err, res) {
+	 					res.should.have.status(200);
 		   				res.body.should.be.a('object');
 						res.body.should.have.property('message');
-						res.body.message.should.equal('You do not have access to delete users');
-		   			})
-		   			// Second request will be made from admin and it should succeed
-		   			.then(function() {
-		   				testToken = Auth.generateToken(adminId);
-		   				chai.request(app)
-		   				.delete(`/api/users/${testUserId}`)
-		   				.set({'x-access-token': testToken})
-		   				.end(function(err, res) {
-		   					res.should.have.status(200);
-		   					res.body.should.be.a('object');
-							res.body.should.have.property('message');
-							res.body.message.should.equal('User successfully deleted');
-		   				});
+						res.body.message.should.equal('User successfully deleted');
+						done();
 		   			});
 		   		});
 		   	});
-		   	done();
 		});
 	});
 });
 
 describe('Grade Routes', function() {
-
-	// Setup tables and register a test user
 	beforeEach(function(done) {
 	    knex.migrate.rollback()
 	    .then(function() {
@@ -234,54 +249,51 @@ describe('Grade Routes', function() {
 	    	});
 	    });
 	});
-
-	// Clear tables
 	afterEach(function(done) {
 	    knex.migrate.rollback()
 	    .then(function() {
 	      done();
 	    });
 	});
-
 	describe('GET /api/grades', function() {
 		it('should return all grades to an authenticated user', function(done) {
 			chai.request(app)
 			.get('/api/grades')
-			.then(function(res) {
-				// This should be an error going to .catch()
-			})
-			.catch(function(err) {})
-			.then(function() {
-				let testToken = null;
-				queries.getAllUsers()
-				.then(function(users) {
-					for (let i=0; i<users.length; i++) {
-						if (users[i].email === 'testUser@gmail.com') {
-							testToken = Auth.generateToken(users[i].user_id);
-						}
+			.then(function(res) {}) // This is an intentional error
+			let testToken = null;
+			queries.getAllUsers()
+			.then(function(users) {
+				for (let i=0; i<users.length; i++) {
+					if (users[i].email === 'testUser@gmail.com') {
+						testToken = Auth.generateToken(users[i].user_id);
 					}
-					chai.request(app)
-					.get('/api/grades/')
-					.set({'x-access-token': testToken})
-					.end(function(err, res) {
-						res.should.have.status(200);
-						res.body.should.be.a('array');
-						res.body.length.should.equal(6);
-						res.body[0].should.have.property('grade_id');
-						res.body[0].should.have.property('user_id');
-						res.body[0].should.have.property('decrypted_string');
-						res.body[0].should.have.property('encrypted_string');
-						res.body[0].should.have.property('created_date');
-						res.body[0].should.have.property('modified_date');
-						done();
-					});
+				}
+				chai.request(app)
+				.get('/api/grades/')
+				.set({'x-access-token': testToken})
+				.end(function(err, res) {
+					res.should.have.status(200);
+					res.body.should.be.a('array');
+					res.body.length.should.equal(6);
+					res.body[0].should.have.property('grade_id');
+					res.body[0].should.have.property('user_id');
+					res.body[0].should.have.property('decrypted_string');
+					res.body[0].should.have.property('encrypted_string');
+					res.body[0].should.have.property('created_date');
+					res.body[0].should.have.property('modified_date');
+					done();
 				});
 			});
 		});
 	});
-
 	describe('GET /api/grades/one', function() {
 		it('should return a specific grade to an authenticated user', function(done) {
+			chai.request(app)
+			.get('/api/grades/one')
+			.send({
+				encrypted_string: 'this string that will fail'
+			})
+			.then(function(res) {}) // This is an intentional error
 			queries.getUserEmail('testUser@gmail.com')
 			.then(function(user) {
 				const testToken = Auth.generateToken(user.user_id);
@@ -290,7 +302,7 @@ describe('Grade Routes', function() {
 				.then(function(grades) {
 					const testGrade = grades[0];
 					chai.request(app)
-					.get(`/api/grades/one`)
+					.get('/api/grades/one')
 					.set({'x-access-token': testToken})
 					.send({
 						encrypted_string: testGrade.encrypted_string
@@ -312,18 +324,12 @@ describe('Grade Routes', function() {
 			})
 		});
 	});
-
 	describe('GET /api/grades/all/:user_id', function() {
 		it('should return all grades of a specific user to an authenticated user', function(done) {
 			const fakeString = Auth.hashPassword('fakeString');
 			chai.request(app)
 			.get(`/api/grades/all/${fakeString}`)
-			.then(function(res) {
-				// This should be an error going to .catch()
-			})
-			.catch(function(err) {
-				
-			})
+			.then(function(res) {}) // This is an intentional error
 			.then(function() {
 				let testToken = null;
 				let testId = null;
@@ -364,11 +370,17 @@ describe('Grade Routes', function() {
 			});
 		});
 	});
-
 	describe('POST /api/grades/', function() {
 		it('should create a new grade', function(done) {
 			const decrypted_string = "12345";
 			const encrypted_string = Auth.hashPassword(decrypted_string);
+			chai.request(app)
+			.post('/api/grades')
+			.send({
+				decrypted_string: decrypted_string,
+				encrypted_string: encrypted_string
+			})
+			.then(function(res) {}) // This is an intentional error
 			let testToken = null;
 			queries.getAllUsers()
 			.then(function(users) {
@@ -394,47 +406,92 @@ describe('Grade Routes', function() {
 			});
 		});
 	});
-
 	describe('PUT /api/grades/:grade_id', function() {
 		it('should update a grade of the user making the request', function(done) {
 			queries.getUserEmail('testUser@gmail.com')
 			.then(function(user) {
 				const testToken = Auth.generateToken(user.user_id);
 				const testId = user.user_id;
-				const decrypted_string = "12345";
-				const encrypted_string = Auth.hashPassword(decrypted_string);
-				const testGrade = [{
-					grade_id: uuidv4(),
-					user_id: testId,
-					decrypted_string: decrypted_string,
-					encrypted_string: encrypted_string,
-					created_date: moment(new Date()),
-					modified_date: moment(new Date())
-				}];
-				const gradeId = testGrade[0].grade_id;
-				queries.addGrade(testGrade)
-				.then(function() {
+				queries.getAllGrades()
+				.then(function(grades) {
+					const gradeToUpdate = grades[0].grade_id;
 					chai.request(app)
-					.put(`/api/grades/${gradeId}`)
+					.put(`/api/grades/${gradeToUpdate}`)
 					.set({'x-access-token': testToken})
 					.send({
 						decrypted_string: "54321"
 					})
-					.end(function(err, res) {
-						res.should.have.status(200);
-						res.body.should.be.a('object');
-						res.body.should.have.property('message');
-						res.body.message.should.equal('Grade successfully updated');
-						done();
+					.then(function(res) {}) // This is an intentional error
+					const decrypted_string = "12345";
+					const encrypted_string = Auth.hashPassword(decrypted_string);
+					const testGrade = [{
+						grade_id: uuidv4(),
+						user_id: testId,
+						decrypted_string: decrypted_string,
+						encrypted_string: encrypted_string,
+						created_date: moment(new Date()),
+						modified_date: moment(new Date())
+					}];
+					const gradeId = testGrade[0].grade_id;
+					queries.addGrade(testGrade)
+					.then(function() {
+						chai.request(app)
+						.put(`/api/grades/${gradeId}`)
+						.set({'x-access-token': testToken})
+						.send({
+							decrypted_string: "54321"
+						})
+						.end(function(err, res) {
+							res.should.have.status(200);
+							res.body.should.be.a('object');
+							res.body.should.have.property('message');
+							res.body.message.should.equal('Grade successfully updated');
+							done();
+						});
 					});
 				});
 			});
 		});
 	});
-
-	// describe('DELETE /api/grades/:grade_id', function() {
-	// 	it('should delete a grade of the user making the request', function(done) {
-
-	// 	});
-	// });
+	describe('DELETE /api/grades/:grade_id', function() {
+		it('should delete a grade of the user making the request', function(done) {
+			queries.getUserEmail('testUser@gmail.com')
+			.then(function(user) {
+				const testToken = Auth.generateToken(user.user_id);
+				const testId = user.user_id;
+				queries.getAllGrades()
+				.then(function(grades) {
+					const gradeToDelete = grades[0].grade_id;
+					chai.request(app)
+					.delete(`/api/grades/${gradeToDelete}`)
+					.set({'x-access-token': testToken})
+					.then(function(res) {}) // This is an intentional error
+					const decrypted_string = "12345";
+					const encrypted_string = Auth.hashPassword(decrypted_string);
+					const testGrade = [{
+						grade_id: uuidv4(),
+						user_id: testId,
+						decrypted_string: decrypted_string,
+						encrypted_string: encrypted_string,
+						created_date: moment(new Date()),
+						modified_date: moment(new Date())
+					}];
+					const gradeId = testGrade[0].grade_id;
+					queries.addGrade(testGrade)
+					.then(function() {
+						chai.request(app)
+						.delete(`/api/grades/${gradeId}`)
+						.set({'x-access-token': testToken})
+						.end(function(err, res) {
+							res.should.have.status(200);
+							res.body.should.be.a('object');
+							res.body.should.have.property('message');
+							res.body.message.should.equal('Grade successfully deleted');
+							done();
+						});
+					});
+				});
+			});
+		});
+	});
 });

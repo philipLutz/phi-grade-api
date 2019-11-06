@@ -54,7 +54,7 @@ const User = {
 		queries.getUserEmail(req.body.email)
 		.then(function(user) {
 			if (!Auth.comparePassword(user.password, req.body.password)) {
-				return res.status(400).send({ 'message': 'The credentials you provided is incorrect' });
+				return res.status(400).send({ 'message': 'The credentials you provided are incorrect' });
 			}	else {
 				const token = Auth.generateToken(user.user_id);
 				return res.status(200).send({token});
