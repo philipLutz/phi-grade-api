@@ -41,7 +41,7 @@ app.use(express.json());
 
 // Dummy Endpoint
 app.get('/api', (req, res) => {
-	return res.status(200).send({'message': 'Phi Grade API'});
+	return res.status(200).send({'message': '\u03A6'});
 });
 
 // Router
