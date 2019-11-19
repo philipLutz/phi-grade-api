@@ -33,7 +33,7 @@ app.use(limiter);
 app.use(express.static('public'));
 
 app.get('/', function(req, res) {
-    res.sendFile(__dirname + '/public/html/signup.html');
+    res.sendFile(__dirname + '/public/html/landing.html');
 });
 
 // Allow app to parse JSON

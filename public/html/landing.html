@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Phi Grade</title>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="Unnecessarily Cryptic Climbing Grades">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="icon" href="https://raw.githubusercontent.com/philipLutz/phi-grade-api/master/public/phi.ico">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <link href="../css/landing.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+	<main>
+		<h1>&Phi;</h1>
+		<div id="tagline">
+			Because rock climbing needs more people arguing about subjective grades...
+		</div>
+
+		<div class="container">
+			<form id="register-form" aria-hidden="true" hidden>
+			<div>
+				<label>Electronic Mailing Address</label>
+				<div>
+					<input id="email-input" class="input" type="text" required>
+				</div>
+			</div>
+			<div>
+				<label>Password</label>
+				<div>
+					<input id="password-input" class="input" type="password" required>
+				</div>
+			</div>
+			<div>
+				<label>Verify Password</label>
+				<div>
+					<input id="verify-password-input" class="input" type="password" required>
+				</div>
+			</div>
+			<div>
+				<label>First Name</label>
+				<div>
+					<input id="first-name-input" class="input" type="text" required>
+				</div>
+			</div>
+			<div>
+				<label>Last Name</label>
+				<div>
+					<input id="last-name-input" class="input" type="text" required>
+				</div>
+			</div>
+			<div>
+				<label>Account Privacy</label>
+				<div>
+					<input id="privacy-input" class="input" type="radio" required>
+				</div>
+			</div>
+		</form>
+		</div>
+
+		<div class="container">
+			
+		</div>
+		
+		<div class="container">
+			<button id="show-register">Register New User</button>
+		</div>
+
+		<div class="container">
+			<button id="show-login">Authenticate Existing User</button>
+		</div>
+	</main>
+	<script type="text/javascript" src="../js/users.js"></script>
+</body>
+</html>
