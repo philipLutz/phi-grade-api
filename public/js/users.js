@@ -58,11 +58,40 @@ function createNewUser() {
 		lastName: $('input[name="last_name"]').val(),
 		private: isPrivate
 	};
-	postNewUser(newUser);
+	registerNewUser(newUser);
 }
 
-function postNewUser(user) {
+function registerNewUser(user) {
+	// $('.post-failure').remove();
+	$.ajax({
+		url: '/api/users/register',
+		type: 'POST',
+		dataType: 'json',
+		contentType: 'application/json',
+		data: JSON.stringify({
+			"email": `${user.email}`,
+			"password": `${user.password}`,
+			"first_name": `${user.firstName}`,
+			"last_name": `${user.lastName}`,
+			"private": `${user.private}`
+		}),
+		success: (data) => {
+			console.log(data);
+			// if(data) {
+			// 	location.href = '/login.html';
 
+			// 	$('input[id="js-signup-firstName"]').val('');
+			// 	$('input[id="js-signup-lastName"]').val('');
+			// 	$('input[id="js-signup-username"]').val('');
+			// 	$('input[id="js-signup-email"]').val('');
+			// 	$('input[id="js-signup-password"]').val('');
+			// }
+		},
+		error: (...res) => {
+			console.log(res[0]);
+			// $('#password-instruction').replaceWith(`<p class='post-failure'><b>Oops! Account creation failed. Please <a href='/'>login</a> or try signing up again.</b></p>`);
+		}
+	});
 }
 
 $('#register-form').submit(event => {
@@ -76,7 +105,6 @@ $('#register-form').submit(event => {
 	}	else {
 		$('#password-error').attr("aria-hidden", "false");
 		$('#password-error').removeAttr("hidden");
-
 	}
 });
 
