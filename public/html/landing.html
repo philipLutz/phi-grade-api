@@ -13,62 +13,51 @@
 <body>
 	<main>
 		<h1>&Phi;</h1>
+
 		<div id="tagline">
 			Because rock climbing needs more people arguing about subjective grades...
+			<br>
 		</div>
-		<br>
+		
 		<div class="register-container">
 			<form id="register-form" aria-hidden="true" hidden>
 				<div>
-					<label>Electronic Mailing Address</label>
+					<label>Electronic_Mailing_Address</label>
 					<div>
-						<input name="email" type="email" align="center" required autofocus="true">
+						<input name="email" type="email" required autofocus="true">
 					</div>
 				</div>
-				<div>
+				<div class="password">
 					<label>Password</label>
 					<div>
 						<input name="password" type="password" required>
 					</div>
 				</div>
-				<div>
-					<label>Verify Password</label>
+				<div class="password">
+					<label>Verify_Password</label>
 					<div>
+						<p id="password-error" aria-hidden="true" hidden>Passwords must match</p>
 						<input name="verify_password" type="password" required>
 					</div>
 				</div>
 				<div>
-					<label>First Name</label>
+					<label>First_Name</label>
 					<div>
 						<input name="first_name" type="text" required>
 					</div>
 				</div>
 				<div>
-					<label>Last Name</label>
+					<label>Last_Name</label>
 					<div>
 						<input name="last_name" type="text" required>
 					</div>
 				</div>
 				<div>
-					<label>Account Privacy</label>
+					<label>Account_Privacy</label>
 					<div>
-						<script>
-							function buttonClick(element) {
-								event.preventDefault();
-								const state = document.getElementById("privacy-radio-input").checked;
-								if (state) {
-									element.style.backgroundColor = "#181B1B";
-									element.style.color = "#CECACA";
-									document.getElementById("privacy-radio-input").checked = false;
-								}	else {
-									element.style.backgroundColor = "#CECACA";
-									element.style.color = "#181B1B";
-									document.getElementById("privacy-radio-input").checked = true;
-								}
-							}
-						</script>
-						<div id="privacy-button" onclick="buttonClick(this)">Only Display Ascent Information</div>
-						<input id="privacy-radio-input" name="privacy" type="radio" value="true" aria-hidden="true" hidden>
+						<div id="privacy-button">Only Display Ascent Information</div>
+						<input id="not-private-input" name="private" type="radio" value="false" aria-hidden="true" checked="true" hidden>
+						<input id="private-input" name="private" type="radio" value="true" aria-hidden="true" hidden>
 					</div>
 				</div>
 				<br>
@@ -82,7 +71,7 @@
 		<div class="container">
 			<form id="login-form" aria-hidden="true" hidden>
 				<div>
-					<label>Electronic Mailing Address</label>
+					<label>Electronic_Mailing_Address</label>
 					<div>
 						<input name="email" type="email" align="center" required autofocus="true">
 					</div>

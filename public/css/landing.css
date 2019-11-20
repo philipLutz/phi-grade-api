@@ -48,6 +48,10 @@ button {
 	background-color: #CECACA;
 }
 
+#password-error {
+	color: red;
+}
+
 button:focus {
 	outline: 0;
 	color: #181B1B;
