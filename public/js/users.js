@@ -77,6 +77,7 @@ function registerNewUser(user) {
 		}),
 		success: (data) => {
 			console.log(data);
+			login(user);
 			// if(data) {
 			// 	location.href = '/login.html';
 
@@ -108,5 +109,36 @@ $('#register-form').submit(event => {
 	}
 });
 
+// Login
+function login(credentials) {
+	$.ajax({
+		url: '/api/users/login',
+		type: 'POST',
+		dataType: 'json',
+		contentType: 'application/json',
+		data: JSON.stringify({
+			"email": `${credentials.email}`,
+			"password": `${credentials.password}`
+		}),
+		success: (token) => {
+			// console.log(token);
+			localStorage.setItem('authToken', token.authToken);
+			window.location.href = '../html/home.html';
+		},
+		error: (...res) => {
+			console.log(res[0]);
+			// $('#password-instruction').replaceWith(`<p class='post-failure'><b>Oops! Account creation failed. Please <a href='/'>login</a> or try signing up again.</b></p>`);
+		}
+	});
+}
+
+$('#login-form').submit(event => {
+	event.preventDefault();
+	const credentials = {
+		email: $('input[name="login-email"]').val(),
+		password: $('input[name="login-password"]').val()
+	}
+	login(credentials);
+});
 
 

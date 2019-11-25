@@ -9,15 +9,16 @@ function authorizeUser() {
 
 function logoutUser() {
 	localStorage.removeItem('authToken');
-	window.location.href = ('/')
+	location.href = ('/');
 };
 
-// $(() => {
-// 	authorizeUser();
-// });
+$(() => {
+	authorizeUser();
+});
 
 //Logout User
-// $('.js-logout-button').click(function(event) {
-// 	event.preventDefault();
-// 	logoutUser();
-// });
+$('#js-logout').click(function(event) {
+	event.preventDefault();
+	console.log('log out click');
+	logoutUser();
+});
