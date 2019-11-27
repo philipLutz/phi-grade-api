@@ -22,6 +22,7 @@ const Auth = {
 		);
 		return token;
 	},
+	// Verification process will change as the cookie will create another layer to parse
 	verifyToken(req, res, next) {
 		const token = req.headers['x-access-token'];
 		if (!token) {

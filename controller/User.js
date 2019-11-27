@@ -57,6 +57,7 @@ const User = {
 				return res.status(400).send({ 'message': 'The credentials you provided are incorrect' });
 			}	else {
 				const token = Auth.generateToken(user.user_id);
+				// Token should be put inside httpOnly cookie and then sent to the client
 				return res.status(200).send({token});
 			}
 		})

@@ -25,6 +25,5 @@ $(() => {
 //Logout User
 $('#js-logout').click(function(event) {
 	event.preventDefault();
-	console.log('log out click');
 	logoutUser();
 });

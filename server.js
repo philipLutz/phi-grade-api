@@ -2,6 +2,7 @@
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const gradesRouter = require('./routes/gradesRouter.js');
 const usersRouter = require('./routes/usersRouter.js');
@@ -21,6 +22,9 @@ app.use(function (req, res, next) {
   }
   next();
 });
+
+// Cookie Parser to store JWTs
+app.use(cookieParser(process.env.COOKIE));
 
 // Limiter
 const limiter = rateLimit({
