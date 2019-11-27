@@ -76,7 +76,7 @@ function registerNewUser(user) {
 			"private": `${user.private}`
 		}),
 		success: (data) => {
-			console.log(data);
+			// console.log(data);
 			login(user);
 			// if(data) {
 			// 	location.href = '/login.html';
@@ -122,8 +122,8 @@ function login(credentials) {
 		}),
 		success: (token) => {
 			// console.log(token);
-			localStorage.setItem('authToken', token.authToken);
-			window.location.href = '../html/home.html';
+			localStorage.setItem('token', token.token);
+			location.href = '/home.html';
 		},
 		error: (...res) => {
 			console.log(res[0]);
@@ -141,4 +141,9 @@ $('#login-form').submit(event => {
 	login(credentials);
 });
 
-
+$(function() {
+	const token = localStorage.getItem('token');
+	if (token) {
+		location.href = '/home.html';
+	}
+});
