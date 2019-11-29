@@ -58,7 +58,13 @@ const User = {
 			}	else {
 				const token = Auth.generateToken(user.user_id);
 				// Token should be put inside httpOnly cookie and then sent to the client
-				return res.status(200).send({token});
+				const cookieConfig = {
+					httpOnly: true,
+					// In production, secure should be set to true.  While doing local testing, I am not using https
+					secure: false,
+					signed: true
+				}
+				return res.status(200).cookie('token', token, cookieConfig).send('Login Success');
 			}
 		})
 		.catch(function(error) {

@@ -2,6 +2,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
+const cookieParser = require('cookie-parser');
 const queries = require('../db/queries.js');
 
 const Auth = {
@@ -22,9 +23,8 @@ const Auth = {
 		);
 		return token;
 	},
-	// Verification process will change as the cookie will create another layer to parse
 	verifyToken(req, res, next) {
-		const token = req.headers['x-access-token'];
+		let token = req.signedCookies['token'];
 		if (!token) {
 			return res.status(400).send({ 'message': 'Token is not provided' });
 		}

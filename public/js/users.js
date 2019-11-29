@@ -141,6 +141,22 @@ $('#login-form').submit(event => {
 	login(credentials);
 });
 
+$('#get').click(event => {
+	event.preventDefault();
+	$.ajax({
+		url: '/api/grades',
+		type: 'GET',
+		dataType: 'json',
+		contentType: 'application/json',
+		success: (data) => {
+			console.log(data);
+		},
+		error: (error) => {
+			console.log(error);
+		}
+	})
+})
+
 $(function() {
 	const token = localStorage.getItem('token');
 	if (token) {
