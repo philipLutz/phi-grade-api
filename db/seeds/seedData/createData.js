@@ -17,7 +17,7 @@ for (let i=0; i<6; i++) {
 	let user = {
 		user_id: uuidv4(),
 		email: makeString(10) + '@gmail.com',
-		password: makeString(7),
+		password: bcrypt.hashSync(makeString(7), bcrypt.genSaltSync(8)),
 		first_name: makeString(32),
 		last_name: makeString(32),
 		bio: makeString(256),
