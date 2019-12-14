@@ -2,6 +2,8 @@
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
+const cookie = require('cookie');
+const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const gradesRouter = require('./routes/gradesRouter.js');
 const usersRouter = require('./routes/usersRouter.js');
@@ -22,6 +24,10 @@ app.use(function (req, res, next) {
   next();
 });
 
+// Cookie Parser to store JWTs as HttpOnly cookie
+// app.use(cookieParser(process.env.COOKIE));
+app.use(cookieParser());
+
 // Limiter
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -33,7 +39,7 @@ app.use(limiter);
 app.use(express.static('public'));
 
 app.get('/', function(req, res) {
-    res.sendFile(__dirname + '/public/html/landing.html');
+    res.sendFile(__dirname + '/public/landing.html');
 });
 
 // Allow app to parse JSON

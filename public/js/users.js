@@ -76,7 +76,8 @@ function registerNewUser(user) {
 			"private": `${user.private}`
 		}),
 		success: (data) => {
-			console.log(data);
+			// console.log(data);
+			login(user);
 			// if(data) {
 			// 	location.href = '/login.html';
 
@@ -108,5 +109,57 @@ $('#register-form').submit(event => {
 	}
 });
 
+// Login
+function login(credentials) {
+	$.ajax({
+		url: '/api/users/login',
+		type: 'POST',
+		dataType: 'json',
+		contentType: 'application/json',
+		data: JSON.stringify({
+			"email": `${credentials.email}`,
+			"password": `${credentials.password}`
+		}),
+		success: (token) => {
+			// console.log(token);
+			localStorage.setItem('token', token.token);
+			location.href = '/home.html';
+		},
+		error: (...res) => {
+			console.log(res[0]);
+			// $('#password-instruction').replaceWith(`<p class='post-failure'><b>Oops! Account creation failed. Please <a href='/'>login</a> or try signing up again.</b></p>`);
+		}
+	});
+}
 
+$('#login-form').submit(event => {
+	event.preventDefault();
+	const credentials = {
+		email: $('input[name="login-email"]').val(),
+		password: $('input[name="login-password"]').val()
+	}
+	login(credentials);
+});
 
+$('#get').click(event => {
+	event.preventDefault();
+	$.ajax({
+		url: '/api/grades',
+		type: 'GET',
+		dataType: 'json',
+		contentType: 'application/json',
+		success: (data) => {
+			console.log(data);
+		},
+		error: (error) => {
+			console.log(error);
+		}
+	})
+})
+
+$(function() {
+	const token = localStorage.getItem('token');
+	if (token) {
+		location.href = '/home.html';
+	}
+});

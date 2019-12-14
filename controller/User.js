@@ -49,15 +49,22 @@ const User = {
 			return res.status(400).send({'message': 'Some values are missing'});
 		}
 		if (!Auth.isValidEmail(req.body.email)) {
-			return res.status(400).send({ 'message': 'Please enter a valid email address' });
+			return res.status(400).send({'message': 'Please enter a valid email address'});
 		}
 		queries.getUserEmail(req.body.email)
 		.then(function(user) {
 			if (!Auth.comparePassword(user.password, req.body.password)) {
-				return res.status(400).send({ 'message': 'The credentials you provided are incorrect' });
+				return res.status(400).send({'message': 'The credentials you provided are incorrect'});
 			}	else {
 				const token = Auth.generateToken(user.user_id);
-				return res.status(200).send({token});
+				// Token should be put inside httpOnly cookie and then sent to the client
+				const cookieConfig = {
+					httpOnly: true,
+					// In production, secure should be set to true.  While doing local testing, I am not using https
+					secure: false,
+					signed: false
+				}
+				return res.status(200).cookie('token', token, cookieConfig).send({'message': 'Login success'});
 			}
 		})
 		.catch(function(error) {
@@ -116,7 +123,7 @@ const User = {
 		}	else {
 			return res.status(401).send({'message': 'You do not have access to delete users'});
 		}
-		
+
 	}
 }
 

@@ -2,6 +2,8 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
+const cookie = require('cookie');
+const cookieParser = require('cookie-parser');
 const queries = require('../db/queries.js');
 
 const Auth = {
@@ -23,15 +25,15 @@ const Auth = {
 		return token;
 	},
 	verifyToken(req, res, next) {
-		const token = req.headers['x-access-token'];
-		if (!token) {
+		if (!req.headers['set-cookie']) {
 			return res.status(400).send({ 'message': 'Token is not provided' });
 		}
+		const token = req.headers['set-cookie'][0].split(';')[0];
 		const decodedToken = jwt.verify(token, process.env.SECRET);
 		queries.getSingleUser(decodedToken.user_id)
 		.then(function(user) {
 			req.user = {
-				user_id: decodedToken.user_id, 
+				user_id: decodedToken.user_id,
 				admin: user.admin
 			};
 			next();

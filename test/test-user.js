@@ -2,6 +2,7 @@ process.env.NODE_ENV = 'test';
 
 const chai = require('chai');
 const chaiHttp = require('chai-http');
+const cookieParser = require('cookie-parser');
 const app = require('../server.js');
 const knex = require('../db/knex.js');
 const queries = require('../db/queries.js');
@@ -90,7 +91,7 @@ describe('User Routes', function() {
 		});
 	});
 	describe('POST /api/users/login', function() {
-		it('should authenticate a user using an incorrect password', function(done) {
+		it('should not authenticate a user using an incorrect password', function(done) {
 			chai.request(app)
 			.post('/api/users/login')
 			.send({
@@ -116,9 +117,8 @@ describe('User Routes', function() {
 			})
 			.end(function(err, res) {
 				res.should.have.status(200);
-				res.body.should.be.a('object');
-				res.body.should.have.property('token');
-				res.body.token.should.be.a('string');
+				res.body.should.have.property('message');
+				res.body.message.should.equal('Login success');
 				done();
 			});
 		});
@@ -144,35 +144,38 @@ describe('User Routes', function() {
 		it('should return public information of a specific user to an authenticated user', function(done) {
 			queries.getAllUsers()
 			.then(function(users) {
-				let testUserId = null;
-				let anotherUserId = null;
-				let testToken = null;
+				let anotherUser = null;
 				for (let i=0; i<users.length; i++) {
-					if (users[i].email === 'testUser@gmail.com') {
-						testUserId = users[i].user_id;
+					if (users[i].email !== 'testUser@gmail.com') {
+						anotherUser = users[i];
 					}	else {
-						anotherUserId = users[i].user_id;
-						testToken = Auth.generateToken(anotherUserId);
-					}
-					if (anotherUserId !== null && testToken !== null && testUserId !== null) {
 						break;
 					}
 				}
 				chai.request(app)
-				.get(`/api/users/${testUserId}`)
-				.set({'x-access-token': testToken})
-				.end(function(err, res) {
-					res.should.have.status(200);
-					res.body.should.be.a('object');
-					res.body.should.have.property('user_id');
-					res.body.user_id.should.equal(testUserId);
-					res.body.should.have.property('first_name');
-					res.body.first_name.should.equal('Test');
-					res.body.should.have.property('last_name');
-					res.body.last_name.should.equal('User');
-					res.body.should.have.property('bio');
-					res.body.bio.should.equal('Test Bio');
-					done();
+				.post('/api/users/login')
+				.send({
+					email: 'testUser@gmail.com',
+					password: '12345'
+				})
+				.then(function(res) {
+					const testCookieToken = res.headers['set-cookie'][0].substring(6);
+					chai.request(app)
+					.get(`/api/users/${anotherUser.user_id}`)
+					.set({'set-cookie': testCookieToken})
+					.end(function(err, res) {
+						res.should.have.status(200);
+						res.body.should.be.a('object');
+						res.body.should.have.property('user_id');
+						res.body.user_id.should.equal(anotherUser.user_id);
+						res.body.should.have.property('first_name');
+						res.body.first_name.should.equal(anotherUser.first_name);
+						res.body.should.have.property('last_name');
+						res.body.last_name.should.equal(anotherUser.last_name);
+						res.body.should.have.property('bio');
+						res.body.bio.should.equal(anotherUser.bio);
+						done();
+					});
 				});
 			});
 		});
@@ -195,15 +198,19 @@ describe('User Routes', function() {
 	});
 	describe('PUT /api/users', function() {
 		it('should update the information of the user making the request', function(done) {
-			queries.getAllUsers()
-			.then(function(users) {
-				const testUserId = users[0].user_id;
-				const testToken = Auth.generateToken(testUserId);
+			chai.request(app)
+			.post('/api/users/login')
+			.send({
+				email: 'testUser@gmail.com',
+				password: '12345'
+			})
+			.then(function(res) {
+				const testCookieToken = res.headers['set-cookie'][0].substring(6);
 				chai.request(app)
 				.put('/api/users')
-				.set({'x-access-token': testToken})
+				.set({'set-cookie': testCookieToken})
 				.send({
-					bio: 'I modified my bio to have more words'
+					bio: 'I modified my bio to be these words.'
 				})
 				.end(function(err, res) {
 					res.should.have.status(200);
@@ -219,27 +226,32 @@ describe('User Routes', function() {
 		it('should prevent user deletion without being an admin', function(done) {
 			queries.getAllUsers()
 			.then(function(users) {
-				let testToken = null;
-				let anotherUserId = null;
+				let anotherUser = null;
 				for (let i=0; i<users.length; i++) {
-					if (users[i].email === 'testUser@gmail.com') {
-						testToken = Auth.generateToken(users[i].user_id);
+					if (users[i].email !== 'testUser@gmail.com' && users[i].admin === false) {
+						anotherUser = users[i];
 					}	else {
-						anotherUserId = users[i].user_id;
-					}
-					if (testToken !== null && anotherUserId !== null) {
 						break;
 					}
 				}
 				chai.request(app)
-				.delete(`/api/users/${anotherUserId}`)
-				.set({'x-access-token': testToken})
-				.end(function(err, res) {
-					res.should.have.status(401);
-					res.body.should.be.a('object');
-					res.body.should.have.property('message');
-					res.body.message.should.equal('You do not have access to delete users');
-					done();
+				.post('/api/users/login')
+				.send({
+					email: 'testUser@gmail.com',
+					password: '12345'
+				})
+				.then(function(res) {
+					const testCookieToken = res.headers['set-cookie'][0].substring(6);
+					chai.request(app)
+					.delete(`/api/users/${anotherUser.user_id}`)
+					.set({'set-cookie': testCookieToken})
+					.end(function(err, res) {
+						res.should.have.status(401);
+						res.body.should.be.a('object');
+						res.body.should.have.property('message');
+						res.body.message.should.equal('You do not have access to delete users');
+						done();
+					});
 				});
 			});
 		});
@@ -247,34 +259,42 @@ describe('User Routes', function() {
 	describe('DELETE /api/users/:user_id', function() {
 		it('should only allow an admin to delete a user', function(done) {
 			const hashPassword = Auth.hashPassword('12345');
-		    const testAdminUser = [{
+		  const testAdminUser = [{
 		   		user_id: uuidv4(),
-				email: 'testAdminUser@gmail.com',
-				password: hashPassword,
-				first_name: 'Test',
-				last_name: 'Admin',
-				bio: 'Test Admin Bio',
-				private: 'false',
-				admin: 'true',
-				created_date: moment(new Date()),
-				modified_date: moment(new Date())
-		    }];
-		    const testToken = Auth.generateToken(testAdminUser[0].user_id);
-		    queries.addUser(testAdminUser)
+					email: 'testAdminUser@gmail.com',
+					password: hashPassword,
+					first_name: 'Test',
+					last_name: 'Admin',
+					bio: 'Test Admin Bio',
+					private: 'false',
+					admin: 'true',
+					created_date: moment(new Date()),
+					modified_date: moment(new Date())
+			}];
+			queries.addUser(testAdminUser)
 		   	.then(function() {
 		   		queries.getUserEmail('testUser@gmail.com')
 		   		.then(function(user) {
-		   			const testUserId = user.user_id;
-		   			chai.request(app)
-		   			.delete(`/api/users/${testUserId}`)
-		   			.set({'x-access-token': testToken})
-		  			.end(function(err, res) {
-	 					res.should.have.status(200);
-		   				res.body.should.be.a('object');
-						res.body.should.have.property('message');
-						res.body.message.should.equal('User successfully deleted');
-						done();
-		   			});
+		   			const testUser = user;
+						chai.request(app)
+						.post('/api/users/login')
+						.send({
+							email: 'testAdminUser@gmail.com',
+							password: '12345'
+						})
+						.then(function(res) {
+							const testCookieToken = res.headers['set-cookie'][0].substring(6);
+							chai.request(app)
+			   			.delete(`/api/users/${testUser.user_id}`)
+			   			.set({'set-cookie': testCookieToken})
+			  			.end(function(err, res) {
+		 						res.should.have.status(200);
+			   				res.body.should.be.a('object');
+								res.body.should.have.property('message');
+								res.body.message.should.equal('User successfully deleted');
+								done();
+			   			});
+						});
 		   		});
 		   	});
 		});

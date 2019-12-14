@@ -2,6 +2,7 @@
 const express = require('express');
 const moment = require('moment');
 const uuidv4 = require('uuid/v4');
+const cookieParser = require('cookie-parser');
 const queries = require('../db/queries.js');
 const Auth = require('../auth/authentication.js');
 
