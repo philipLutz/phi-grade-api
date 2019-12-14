@@ -16,11 +16,19 @@ const Auth = {
 	isValidEmail(email) {
 		return /\S+@\S+\.\S+/.test(email);
 	},
-	generateToken(user_id) {
+	generateToken(user_id, expiry) {
 		const token = jwt.sign({
 			user_id: user_id
 		},
-			process.env.SECRET, {expiresIn: process.env.EXPIRY}
+			process.env.SECRET, {expiresIn: expiry}
+		);
+		return token;
+	},
+	generateClientToken(user_id, expiry) {
+		const token = jwt.sign({
+			user_id: user_id
+		},
+			process.env.CLIENT, {expiresIn: expiry}
 		);
 		return token;
 	},

@@ -56,15 +56,22 @@ const User = {
 			if (!Auth.comparePassword(user.password, req.body.password)) {
 				return res.status(400).send({'message': 'The credentials you provided are incorrect'});
 			}	else {
-				const token = Auth.generateToken(user.user_id);
+				let expiry = new Date();
+				expiry.setDate(expiry.getDate() + 1);
+				const token = Auth.generateToken(user.user_id, expiry);
+				const clientToken = Auth.generateClientToken(user.user_id, expiry);
 				// Token should be put inside httpOnly cookie and then sent to the client
 				const cookieConfig = {
 					httpOnly: true,
 					// In production, secure should be set to true.  While doing local testing, I am not using https
 					secure: false,
-					signed: false
+					signed: false,
+					expires: expiry
 				}
-				return res.status(200).cookie('token', token, cookieConfig).send({'message': 'Login success'});
+				return res.status(200).cookie('token', token, cookieConfig).send([
+					{'message': 'Login success'},
+					{'client_token': clientToken}
+				]);
 			}
 		})
 		.catch(function(error) {

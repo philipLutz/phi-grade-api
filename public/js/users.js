@@ -120,9 +120,9 @@ function login(credentials) {
 			"email": `${credentials.email}`,
 			"password": `${credentials.password}`
 		}),
-		success: (token) => {
-			// console.log(token);
-			localStorage.setItem('token', token.token);
+		success: (res) => {
+			console.log(res[1].client_token);
+			localStorage.setItem('client_token', res[1].client_token);
 			location.href = '/home.html';
 		},
 		error: (...res) => {
@@ -158,8 +158,7 @@ $('#get').click(event => {
 })
 
 $(function() {
-	const token = localStorage.getItem('token');
-	if (token) {
+	if (localStorage.getItem('client_token')) {
 		location.href = '/home.html';
 	}
 });

@@ -24,15 +24,15 @@ describe('User Routes', function() {
 	    			const hashPassword = Auth.hashPassword('12345');
 			    	const testUser = [{
 			    		user_id: uuidv4(),
-						email: 'testUser@gmail.com',
-						password: hashPassword,
-						first_name: 'Test',
-						last_name: 'User',
-						bio: 'Test Bio',
-						private: 'false',
-						admin: 'false',
-						created_date: moment(new Date()),
-						modified_date: moment(new Date())
+							email: 'testUser@gmail.com',
+							password: hashPassword,
+							first_name: 'Test',
+							last_name: 'User',
+							bio: 'Test Bio',
+							private: 'false',
+							admin: 'false',
+							created_date: moment(new Date()),
+							modified_date: moment(new Date())
 			    	}];
 			    	queries.addUser(testUser)
 			    	.then(function() {

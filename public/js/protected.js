@@ -7,14 +7,15 @@ function parseJwt(token) {
 };
 
 function authorizeUser() {
-	const token = localStorage.getItem('token');
-	if (!token) {
+	if (!localStorage.getItem('client_token')) {
 		location.href = '/';
+	}	else {
+		console.log(parseJwt(localStorage.getItem('client_token')));
 	}
 };
 
 function logoutUser() {
-	localStorage.removeItem('token');
+	localStorage.removeItem('client_token');
 	location.href = ('/');
 };
 
