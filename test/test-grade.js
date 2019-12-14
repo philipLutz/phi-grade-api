@@ -2,6 +2,7 @@ process.env.NODE_ENV = 'test';
 
 const chai = require('chai');
 const chaiHttp = require('chai-http');
+const cookieParser = require('cookie-parser');
 const app = require('../server.js');
 const knex = require('../db/knex.js');
 const queries = require('../db/queries.js');
@@ -62,12 +63,17 @@ describe('Grade Routes', function() { // CREATE tables, seed database, and regis
 	});
 	describe('GET /api/grades', function() {
 		it('should return all grades to an authenticated user', function(done) {
-			queries.getUserEmail('testUser@gmail.com')
-			.then(function(user) {
-				const testToken = Auth.generateToken(user.user_id);
+			chai.request(app)
+			.post('/api/users/login')
+			.send({
+				email: 'testUser@gmail.com',
+				password: '12345'
+			})
+			.then(function(res) {
+				const testCookieToken = res.headers['set-cookie'][0].substring(6);
 				chai.request(app)
 				.get('/api/grades/')
-				.set({'x-access-token': testToken})
+				.set({'set-cookie': testCookieToken})
 				.end(function(err, res) {
 					res.should.have.status(200);
 					res.body.should.be.a('array');
@@ -101,16 +107,20 @@ describe('Grade Routes', function() { // CREATE tables, seed database, and regis
 	});
 	describe('GET /api/grades/one', function() {
 		it('should return a specific grade to an authenticated user', function(done) {
-			queries.getUserEmail('testUser@gmail.com')
-			.then(function(user) {
-				const testToken = Auth.generateToken(user.user_id);
-				const testId = user.user_id;
+			chai.request(app)
+			.post('/api/users/login')
+			.send({
+				email: 'testUser@gmail.com',
+				password: '12345'
+			})
+			.then(function(res) {
+				const testCookieToken = res.headers['set-cookie'][0].substring(6);
 				queries.getAllGrades()
 				.then(function(grades) {
 					const testGrade = grades[0];
 					chai.request(app)
 					.get('/api/grades/one')
-					.set({'x-access-token': testToken})
+					.set({'set-cookie': testCookieToken})
 					.send({
 						encrypted_string: testGrade.encrypted_string
 					})
@@ -152,7 +162,6 @@ describe('Grade Routes', function() { // CREATE tables, seed database, and regis
 		it('should return all grades of a specific user to an authenticated user', function(done) {
 			queries.getUserEmail('testUser@gmail.com')
 			.then(function(user) {
-				const testToken = Auth.generateToken(user.user_id);
 				const testId = user.user_id;
 				const decrypted_string = "12345";
 				const encrypted_string = Auth.hashPassword(decrypted_string);
@@ -167,20 +176,29 @@ describe('Grade Routes', function() { // CREATE tables, seed database, and regis
 				queries.addGrade(testGrade)
 				.then(function() {
 					chai.request(app)
-					.get(`/api/grades/all/${testId}`)
-					.set({'x-access-token': testToken})
-					.end(function(err, res) {
-						res.should.have.status(200);
-						res.body.should.be.a('array');
-						res.body[0].should.have.property('grade_id');
-						res.body[0].grade_id.should.be.a('string');
-						res.body[0].should.have.property('user_id');
-						res.body[0].user_id.should.equal(testId);
-						res.body[0].should.have.property('decrypted_string');
-						res.body[0].decrypted_string.should.equal('12345')
-						res.body[0].should.have.property('encrypted_string');
-						res.body[0].encrypted_string.should.equal(encrypted_string);
-						done();
+					.post('/api/users/login')
+					.send({
+						email: 'testUser@gmail.com',
+						password: '12345'
+					})
+					.then(function(res) {
+						const testCookieToken = res.headers['set-cookie'][0].substring(6);
+						chai.request(app)
+						.get(`/api/grades/all/${testId}`)
+						.set({'set-cookie': testCookieToken})
+						.end(function(err, res) {
+							res.should.have.status(200);
+							res.body.should.be.a('array');
+							res.body[0].should.have.property('grade_id');
+							res.body[0].grade_id.should.be.a('string');
+							res.body[0].should.have.property('user_id');
+							res.body[0].user_id.should.equal(testId);
+							res.body[0].should.have.property('decrypted_string');
+							res.body[0].decrypted_string.should.equal('12345')
+							res.body[0].should.have.property('encrypted_string');
+							res.body[0].encrypted_string.should.equal(encrypted_string);
+							done();
+						});
 					});
 				});
 			});
@@ -207,9 +225,14 @@ describe('Grade Routes', function() { // CREATE tables, seed database, and regis
 	});
 	describe('POST /api/grades', function() {
 		it('should create a new grade', function(done) {
-			queries.getUserEmail('testUser@gmail.com')
-			.then(function(user) {
-				const testToken = Auth.generateToken(user.user_id);
+			chai.request(app)
+			.post('/api/users/login')
+			.send({
+				email: 'testUser@gmail.com',
+				password: '12345'
+			})
+			.then(function(res) {
+				const testCookieToken = res.headers['set-cookie'][0].substring(6);
 				const decrypted_string = "12345";
 				const encrypted_string = Auth.hashPassword(decrypted_string);
 				chai.request(app)
@@ -218,7 +241,7 @@ describe('Grade Routes', function() { // CREATE tables, seed database, and regis
 					decrypted_string: decrypted_string,
 					encrypted_string: encrypted_string
 				})
-				.set({'x-access-token': testToken})
+				.set({'set-cookie': testCookieToken})
 				.end(function(err, res) {
 					res.should.have.status(201);
 					res.body.should.be.a('object');
@@ -231,54 +254,14 @@ describe('Grade Routes', function() { // CREATE tables, seed database, and regis
 	});
 	describe('PUT /api/grades/:grade_id', function() {
 		it('should not allow a user to update a grade of another user', function(done) {
-			queries.getUserEmail('testUser@gmail.com')
-			.then(function(user) {
-				let testToken = Auth.generateToken(user.user_id);
-				const testUserId = user.user_id;
-				const decrypted_string = "12345";
-				const encrypted_string = Auth.hashPassword(decrypted_string);
-				const testGrade = [{
-					grade_id: uuidv4(),
-					user_id: testUserId,
-					decrypted_string: decrypted_string,
-					encrypted_string: encrypted_string,
-					created_date: moment(new Date()),
-					modified_date: moment(new Date())
-				}];
-				const gradeId = testGrade[0].grade_id;
-				queries.addGrade(testGrade)
-				.then(function() {
-					queries.getAllUsers()
-					.then(function(users) {
-						for (let i=0; i<users.length; i++) {
-							if (users[i].email !== 'testUser@gmail.com') {
-								testToken = Auth.generateToken(users[i].user_id);
-								break;
-							}
-						}
-						chai.request(app)
-						.put(`/api/grades/${gradeId}`)
-						.set({'x-access-token': testToken})
-						.send({
-							decrypted_string: "54321"
-						})
-						.end(function(err, res) {
-							res.should.have.status(401);
-							res.body.should.be.a('object');
-							res.body.should.have.property('message');
-							res.body.message.should.equal('Unauthorized request to update grade');
-							done();
-						});
-					});
-				});
-			});
+			// find user that is not testUser in database and create grade then login with testUser
+			done();
 		});
 	});
 	describe('PUT /api/grades/:grade_id', function() {
 		it('should update a grade of the user making the request', function(done) {
 			queries.getUserEmail('testUser@gmail.com')
 			.then(function(user) {
-				const testToken = Auth.generateToken(user.user_id);
 				const testId = user.user_id;
 				const decrypted_string = "12345";
 				const encrypted_string = Auth.hashPassword(decrypted_string);
@@ -294,17 +277,26 @@ describe('Grade Routes', function() { // CREATE tables, seed database, and regis
 				queries.addGrade(testGrade)
 				.then(function() {
 					chai.request(app)
-					.put(`/api/grades/${gradeId}`)
-					.set({'x-access-token': testToken})
+					.post('/api/users/login')
 					.send({
-						decrypted_string: "54321"
+						email: 'testUser@gmail.com',
+						password: '12345'
 					})
-					.end(function(err, res) {
-						res.should.have.status(200);
-						res.body.should.be.a('object');
-						res.body.should.have.property('message');
-						res.body.message.should.equal('Grade successfully updated');
-						done();
+					.then(function(res) {
+						const testCookieToken = res.headers['set-cookie'][0].substring(6);
+						chai.request(app)
+						.put(`/api/grades/${gradeId}`)
+						.set({'set-cookie': testCookieToken})
+						.send({
+							decrypted_string: "54321"
+						})
+						.end(function(err, res) {
+							res.should.have.status(200);
+							res.body.should.be.a('object');
+							res.body.should.have.property('message');
+							res.body.message.should.equal('Grade successfully updated');
+							done();
+						});
 					});
 				});
 			});
@@ -312,51 +304,14 @@ describe('Grade Routes', function() { // CREATE tables, seed database, and regis
 	});
 	describe('DELETE /api/grades/:grade_id', function() {
 		it('should not allow a user to delete the grade of another user', function(done) {
-			queries.getUserEmail('testUser@gmail.com')
-			.then(function(user) {
-				let testToken = Auth.generateToken(user.user_id);
-				const testUserId = user.user_id;
-				const decrypted_string = "12345";
-				const encrypted_string = Auth.hashPassword(decrypted_string);
-				const testGrade = [{
-					grade_id: uuidv4(),
-					user_id: testUserId,
-					decrypted_string: decrypted_string,
-					encrypted_string: encrypted_string,
-					created_date: moment(new Date()),
-					modified_date: moment(new Date())
-				}];
-				const gradeId = testGrade[0].grade_id;
-				queries.addGrade(testGrade)
-				.then(function() {
-					queries.getAllUsers()
-					.then(function(users) {
-						for (let i=0; i<users.length; i++) {
-							if (users[i].email !== 'testUser@gmail.com') {
-								testToken = Auth.generateToken(users[i].user_id);
-								break;
-							}
-						}
-						chai.request(app)
-						.delete(`/api/grades/${gradeId}`)
-						.set({'x-access-token': testToken})
-						.end(function(err, res) {
-							res.should.have.status(401);
-							res.body.should.be.a('object');
-							res.body.should.have.property('message');
-							res.body.message.should.equal('Unauthorized request to delete grade');
-							done();
-						});
-					});
-				});
-			});
+			// find user that is not testUser in database and create grade then login with testUser
+			done();
 		});
 	});
 	describe('DELETE /api/grades/:grade_id', function() {
 		it('should delete a grade of the user making the request', function(done) {
 			queries.getUserEmail('testUser@gmail.com')
 			.then(function(user) {
-				const testToken = Auth.generateToken(user.user_id);
 				const testId = user.user_id;
 				const decrypted_string = "12345";
 				const encrypted_string = Auth.hashPassword(decrypted_string);
@@ -372,14 +327,23 @@ describe('Grade Routes', function() { // CREATE tables, seed database, and regis
 				queries.addGrade(testGrade)
 				.then(function() {
 					chai.request(app)
-					.delete(`/api/grades/${gradeId}`)
-					.set({'x-access-token': testToken})
-					.end(function(err, res) {
-						res.should.have.status(200);
-						res.body.should.be.a('object');
-						res.body.should.have.property('message');
-						res.body.message.should.equal('Grade successfully deleted');
-						done();
+					.post('/api/users/login')
+					.send({
+						email: 'testUser@gmail.com',
+						password: '12345'
+					})
+					.then(function(res) {
+						const testCookieToken = res.headers['set-cookie'][0].substring(6);
+						chai.request(app)
+						.delete(`/api/grades/${gradeId}`)
+						.set({'set-cookie': testCookieToken})
+						.end(function(err, res) {
+							res.should.have.status(200);
+							res.body.should.be.a('object');
+							res.body.should.have.property('message');
+							res.body.message.should.equal('Grade successfully deleted');
+							done();
+						});
 					});
 				});
 			});
