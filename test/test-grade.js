@@ -254,20 +254,64 @@ describe('Grade Routes', function() { // CREATE tables, seed database, and regis
 	});
 	describe('PUT /api/grades/:grade_id', function() {
 		it('should not allow a user to update a grade of another user', function(done) {
-			// find user that is not testUser in database and create grade then login with testUser
-			done();
+			queries.getAllUsers()
+			.then(function(users) {
+				let anotherUser = null;
+				for (let i=0; i<users.length; i++) {
+					if (users[i].email !== 'testUser@gmail.com') {
+						anotherUser = users[i];
+					}	else {
+						break;
+					}
+				}
+				const decrypted_string = "12345";
+				const encrypted_string = Auth.hashPassword(decrypted_string);
+				const testGrade = [{
+					grade_id: uuidv4(),
+					user_id: anotherUser.user_id,
+					decrypted_string: decrypted_string,
+					encrypted_string: encrypted_string,
+					created_date: moment(new Date()),
+					modified_date: moment(new Date())
+				}];
+				const gradeId = testGrade[0].grade_id;
+				queries.addGrade(testGrade)
+				.then(function() {
+					chai.request(app)
+					.post('/api/users/login')
+					.send({
+						email: 'testUser@gmail.com',
+						password: '12345'
+					})
+					.then(function(res) {
+						const testCookieToken = res.headers['set-cookie'][0].substring(6);
+						chai.request(app)
+						.put(`/api/grades/${gradeId}`)
+						.set({'set-cookie': testCookieToken})
+						.send({
+							decrypted_string: "54321"
+						})
+						.end(function(err, res) {
+							res.should.have.status(401);
+							res.body.should.be.a('object');
+							res.body.should.have.property('message');
+							res.body.message.should.equal('Unauthorized request to update grade');
+							done();
+						});
+					});
+				});
+			});
 		});
 	});
 	describe('PUT /api/grades/:grade_id', function() {
 		it('should update a grade of the user making the request', function(done) {
 			queries.getUserEmail('testUser@gmail.com')
 			.then(function(user) {
-				const testId = user.user_id;
 				const decrypted_string = "12345";
 				const encrypted_string = Auth.hashPassword(decrypted_string);
 				const testGrade = [{
 					grade_id: uuidv4(),
-					user_id: testId,
+					user_id: user.user_id,
 					decrypted_string: decrypted_string,
 					encrypted_string: encrypted_string,
 					created_date: moment(new Date()),
@@ -304,20 +348,61 @@ describe('Grade Routes', function() { // CREATE tables, seed database, and regis
 	});
 	describe('DELETE /api/grades/:grade_id', function() {
 		it('should not allow a user to delete the grade of another user', function(done) {
-			// find user that is not testUser in database and create grade then login with testUser
-			done();
+			queries.getAllUsers()
+			.then(function(users) {
+				let anotherUser = null;
+				for (let i=0; i<users.length; i++) {
+					if (users[i].email !== 'testUser@gmail.com') {
+						anotherUser = users[i];
+					}	else {
+						break;
+					}
+				}
+				const decrypted_string = "12345";
+				const encrypted_string = Auth.hashPassword(decrypted_string);
+				const testGrade = [{
+					grade_id: uuidv4(),
+					user_id: anotherUser.user_id,
+					decrypted_string: decrypted_string,
+					encrypted_string: encrypted_string,
+					created_date: moment(new Date()),
+					modified_date: moment(new Date())
+				}];
+				const gradeId = testGrade[0].grade_id;
+				queries.addGrade(testGrade)
+				.then(function() {
+					chai.request(app)
+					.post('/api/users/login')
+					.send({
+						email: 'testUser@gmail.com',
+						password: '12345'
+					})
+					.then(function(res) {
+						const testCookieToken = res.headers['set-cookie'][0].substring(6);
+						chai.request(app)
+						.delete(`/api/grades/${gradeId}`)
+						.set({'set-cookie': testCookieToken})
+						.end(function(err, res) {
+							res.should.have.status(401);
+							res.body.should.be.a('object');
+							res.body.should.have.property('message');
+							res.body.message.should.equal('Unauthorized request to delete grade');
+							done();
+						});
+					});
+				});
+			});
 		});
 	});
 	describe('DELETE /api/grades/:grade_id', function() {
 		it('should delete a grade of the user making the request', function(done) {
 			queries.getUserEmail('testUser@gmail.com')
 			.then(function(user) {
-				const testId = user.user_id;
 				const decrypted_string = "12345";
 				const encrypted_string = Auth.hashPassword(decrypted_string);
 				const testGrade = [{
 					grade_id: uuidv4(),
-					user_id: testId,
+					user_id: user.user_id,
 					decrypted_string: decrypted_string,
 					encrypted_string: encrypted_string,
 					created_date: moment(new Date()),
