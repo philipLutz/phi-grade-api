@@ -117,8 +117,12 @@ describe('User Routes', function() {
 			})
 			.end(function(err, res) {
 				res.should.have.status(200);
-				res.body.should.have.property('message');
-				res.body.message.should.equal('Login success');
+				res.body.should.be.a('array');
+				res.body[0].should.have.property('message');
+				res.body[0].message.should.equal('Login success');
+				res.body[1].should.have.property('client_token');
+				res.body[1].client_token.should.be.a('string');
+				res.headers['set-cookie'][0].should.be.a('string');
 				done();
 			});
 		});
