@@ -9,8 +9,6 @@ function parseJwt(token) {
 function authorizeUser() {
 	if (!localStorage.getItem('client_token')) {
 		location.href = '/';
-	}	else {
-		console.log(parseJwt(localStorage.getItem('client_token')));
 	}
 };
 

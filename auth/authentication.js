@@ -33,10 +33,15 @@ const Auth = {
 		return token;
 	},
 	verifyToken(req, res, next) {
-		if (!req.headers['set-cookie']) {
+		if (!req.headers['set-cookie'] && !req.headers.cookie) {
 			return res.status(400).send({ 'message': 'Token is not provided' });
 		}
-		const token = req.headers['set-cookie'][0].split(';')[0];
+		let token;
+		if (req.headers.cookie) {
+			token = req.headers.cookie.substring(6);
+		}	else {
+			token = req.headers['set-cookie'][0].split(';')[0];
+		}
 		const decodedToken = jwt.verify(token, process.env.SECRET);
 		queries.getSingleUser(decodedToken.user_id)
 		.then(function(user) {

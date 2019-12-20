@@ -76,17 +76,7 @@ function registerNewUser(user) {
 			"private": `${user.private}`
 		}),
 		success: (data) => {
-			// console.log(data);
 			login(user);
-			// if(data) {
-			// 	location.href = '/login.html';
-
-			// 	$('input[id="js-signup-firstName"]').val('');
-			// 	$('input[id="js-signup-lastName"]').val('');
-			// 	$('input[id="js-signup-username"]').val('');
-			// 	$('input[id="js-signup-email"]').val('');
-			// 	$('input[id="js-signup-password"]').val('');
-			// }
 		},
 		error: (...res) => {
 			console.log(res[0]);
@@ -121,7 +111,6 @@ function login(credentials) {
 			"password": `${credentials.password}`
 		}),
 		success: (res) => {
-			console.log(res[1].client_token);
 			localStorage.setItem('client_token', res[1].client_token);
 			location.href = '/home.html';
 		},
@@ -140,22 +129,6 @@ $('#login-form').submit(event => {
 	}
 	login(credentials);
 });
-
-$('#get').click(event => {
-	event.preventDefault();
-	$.ajax({
-		url: '/api/grades',
-		type: 'GET',
-		dataType: 'json',
-		contentType: 'application/json',
-		success: (data) => {
-			console.log(data);
-		},
-		error: (error) => {
-			console.log(error);
-		}
-	})
-})
 
 $(function() {
 	if (localStorage.getItem('client_token')) {

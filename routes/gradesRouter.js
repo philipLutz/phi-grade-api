@@ -5,6 +5,7 @@ const router = express.Router();
 const Grade = require('../controller/Grade.js');
 const Auth = require('../auth/authentication.js');
 
+// router.get('/', Grade.getAllGrades);
 router.get('/', Auth.verifyToken, Grade.getAllGrades);
 router.get('/one', Auth.verifyToken, Grade.getSingleGrade);
 router.get('/all/:user_id', Auth.verifyToken, Grade.getAllUserGrades);
