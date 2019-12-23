@@ -1,6 +1,22 @@
 "use strict";
 
 // Button actions
+$('#phi').click(event => {
+	event.preventDefault();
+	$('#register-fail').empty();
+	$('#login-fail').empty();
+	$('#login-form').attr("aria-hidden", "true");
+	$('#login-form').attr("hidden", "true");
+	$('#register-form').attr("aria-hidden", "true");
+	$('#register-form').attr("hidden", "true");
+	$('#show-login').attr("aria-hidden", "false");
+	$('#show-login').removeAttr("hidden");
+	$('#show-register').attr("aria-hidden", "false");
+	$('#show-register').removeAttr("hidden");
+	$('#tagline').attr("aria-hidden", "false");
+	$('#tagline').removeAttr("hidden");
+});
+
 $('#show-register').click(event => {
 	event.preventDefault();
 	$('#register-fail').empty();
