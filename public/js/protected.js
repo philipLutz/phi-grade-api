@@ -41,13 +41,13 @@ $(() => {
 });
 
 // GET User PROFILE
-$('#js-profile').click(function(event) {
+$('#show-profile').click(function(event) {
 	event.preventDefault();
 	getUser(parseJwt(localStorage.client_token).user_id);
 });
 
 //Logout User
-$('#js-logout').click(function(event) {
+$('#logout').click(function(event) {
 	event.preventDefault();
 	logoutUser();
 });

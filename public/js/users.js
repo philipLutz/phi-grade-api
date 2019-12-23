@@ -3,6 +3,8 @@
 // Button actions
 $('#show-register').click(event => {
 	event.preventDefault();
+	$('#register-fail').empty();
+	$('#login-fail').empty();
 	$('#tagline').attr("aria-hidden", "true");
 	$('#tagline').attr("hidden", "true");
 	$('#show-register').attr("aria-hidden", "true");
@@ -17,6 +19,8 @@ $('#show-register').click(event => {
 
 $('#show-login').click(event => {
 	event.preventDefault();
+	$('#register-fail').empty();
+	$('#login-fail').empty();
 	$('#tagline').attr("aria-hidden", "true");
 	$('#tagline').attr("hidden", "true");
 	$('#show-login').attr("aria-hidden", "true");
@@ -62,7 +66,7 @@ function createNewUser() {
 }
 
 function registerNewUser(user) {
-	// $('.post-failure').remove();
+	$('#register-fail').empty();
 	$.ajax({
 		url: '/api/users/register',
 		type: 'POST',
@@ -79,8 +83,11 @@ function registerNewUser(user) {
 			login(user);
 		},
 		error: (...res) => {
-			console.log(res[0]);
-			// $('#password-instruction').replaceWith(`<p class='post-failure'><b>Oops! Account creation failed. Please <a href='/'>login</a> or try signing up again.</b></p>`);
+			$('#register-fail').append(`
+					<p>${res[0].status} ${res[0].statusText}</p>
+					<p>${res[0].responseJSON.message}</p>
+					<br>
+			`);
 		}
 	});
 }
@@ -101,6 +108,7 @@ $('#register-form').submit(event => {
 
 // Login
 function login(credentials) {
+	$('#login-fail').empty();
 	$.ajax({
 		url: '/api/users/login',
 		type: 'POST',
@@ -115,8 +123,11 @@ function login(credentials) {
 			location.href = '/home.html';
 		},
 		error: (...res) => {
-			console.log(res[0]);
-			// $('#password-instruction').replaceWith(`<p class='post-failure'><b>Oops! Account creation failed. Please <a href='/'>login</a> or try signing up again.</b></p>`);
+			$('#login-fail').append(`
+					<p>${res[0].status} ${res[0].statusText}</p>
+					<p>${res[0].responseJSON.message}</p>
+					<br>
+			`);
 		}
 	});
 }
@@ -130,6 +141,7 @@ $('#login-form').submit(event => {
 	login(credentials);
 });
 
+// Check if user has client auth token
 $(function() {
 	if (localStorage.getItem('client_token')) {
 		location.href = '/home.html';
