@@ -13,13 +13,21 @@
 <body>
     <main>
 			<nav>
-				<button id="js-profile">PROFILE</button>
-				<button id="js-encrypt">ENCRYPT</button>
-				<button id="js-decrypt">DECRYPT</button>
-				<button id="js-logout">EXIT</button>
+				<button id="show-profile">PROFILE</button>
+				<button id="show-encrypt">ENCRYPT</button>
+				<button id="show-decrypt">DECRYPT</button>
+				<button id="show-logout">EXIT</button>
 			</nav>
-      <h1>&Phi;</h1>
+      <h1 id="phi">&Phi;</h1>
       <h2>HOME</h2>
+			<section id="display">
+				<section id="all-grades"></section>
+				<section id="profile" aria-hidden="true" hidden></section>
+				<section id="encrypt" aria-hidden="true" hidden></section>
+				<section id="decrypt" aria-hidden="true" hidden></section>
+				<section id="edit-grade" aria-hidden="true" hidden></section>
+				<section id="other-profile" aria-hidden="true" hidden></section>
+			</section>
     </main>
     <script type="text/javascript" src="./js/protected.js"></script>
 		<script type="text/javascript" src="./js/grades.js"></script>

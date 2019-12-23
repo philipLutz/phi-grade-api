@@ -9,7 +9,26 @@ function parseJwt(token) {
 function authorizeUser() {
 	if (!localStorage.getItem('client_token')) {
 		location.href = '/';
-	}
+	};
+};
+
+function getUser(user_id) {
+	// console.log(user_id);
+	$.ajax({
+		url: `/api/users/${user_id}`,
+		type: 'GET',
+		dataType: 'json',
+		contentType: 'application/json',
+		xhrFields: {
+      withCredentials: true
+   	},
+		success: (data) => {
+			console.log(data);
+		},
+		error: (error) => {
+			console.log(error);
+		}
+	});
 };
 
 function logoutUser() {
@@ -19,6 +38,12 @@ function logoutUser() {
 
 $(() => {
 	authorizeUser();
+});
+
+// GET User PROFILE
+$('#js-profile').click(function(event) {
+	event.preventDefault();
+	getUser(parseJwt(localStorage.client_token).user_id);
 });
 
 //Logout User
