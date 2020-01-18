@@ -35,13 +35,6 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Serve Static Files
-app.use(express.static('public'));
-
-app.get('/', function(req, res) {
-    res.sendFile(__dirname + '/public/landing.html');
-});
-
 // Allow app to parse JSON
 app.use(express.json());
 

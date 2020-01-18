@@ -1,8 +1,26 @@
 "use strict";
 
 // Button actions
+$('#phi').click(event => {
+	event.preventDefault();
+	$('#register-fail').empty();
+	$('#login-fail').empty();
+	$('#login-form').attr("aria-hidden", "true");
+	$('#login-form').attr("hidden", "true");
+	$('#register-form').attr("aria-hidden", "true");
+	$('#register-form').attr("hidden", "true");
+	$('#show-login').attr("aria-hidden", "false");
+	$('#show-login').removeAttr("hidden");
+	$('#show-register').attr("aria-hidden", "false");
+	$('#show-register').removeAttr("hidden");
+	$('#tagline').attr("aria-hidden", "false");
+	$('#tagline').removeAttr("hidden");
+});
+
 $('#show-register').click(event => {
 	event.preventDefault();
+	$('#register-fail').empty();
+	$('#login-fail').empty();
 	$('#tagline').attr("aria-hidden", "true");
 	$('#tagline').attr("hidden", "true");
 	$('#show-register').attr("aria-hidden", "true");
@@ -17,6 +35,8 @@ $('#show-register').click(event => {
 
 $('#show-login').click(event => {
 	event.preventDefault();
+	$('#register-fail').empty();
+	$('#login-fail').empty();
 	$('#tagline').attr("aria-hidden", "true");
 	$('#tagline').attr("hidden", "true");
 	$('#show-login').attr("aria-hidden", "true");
@@ -62,7 +82,7 @@ function createNewUser() {
 }
 
 function registerNewUser(user) {
-	// $('.post-failure').remove();
+	$('#register-fail').empty();
 	$.ajax({
 		url: '/api/users/register',
 		type: 'POST',
@@ -76,21 +96,14 @@ function registerNewUser(user) {
 			"private": `${user.private}`
 		}),
 		success: (data) => {
-			// console.log(data);
 			login(user);
-			// if(data) {
-			// 	location.href = '/login.html';
-
-			// 	$('input[id="js-signup-firstName"]').val('');
-			// 	$('input[id="js-signup-lastName"]').val('');
-			// 	$('input[id="js-signup-username"]').val('');
-			// 	$('input[id="js-signup-email"]').val('');
-			// 	$('input[id="js-signup-password"]').val('');
-			// }
 		},
 		error: (...res) => {
-			console.log(res[0]);
-			// $('#password-instruction').replaceWith(`<p class='post-failure'><b>Oops! Account creation failed. Please <a href='/'>login</a> or try signing up again.</b></p>`);
+			$('#register-fail').append(`
+					<p>${res[0].status} ${res[0].statusText}</p>
+					<p>${res[0].responseJSON.message}</p>
+					<br>
+			`);
 		}
 	});
 }
@@ -111,6 +124,7 @@ $('#register-form').submit(event => {
 
 // Login
 function login(credentials) {
+	$('#login-fail').empty();
 	$.ajax({
 		url: '/api/users/login',
 		type: 'POST',
@@ -120,14 +134,16 @@ function login(credentials) {
 			"email": `${credentials.email}`,
 			"password": `${credentials.password}`
 		}),
-		success: (token) => {
-			// console.log(token);
-			localStorage.setItem('token', token.token);
+		success: (res) => {
+			localStorage.setItem('client_token', res[1].client_token);
 			location.href = '/home.html';
 		},
 		error: (...res) => {
-			console.log(res[0]);
-			// $('#password-instruction').replaceWith(`<p class='post-failure'><b>Oops! Account creation failed. Please <a href='/'>login</a> or try signing up again.</b></p>`);
+			$('#login-fail').append(`
+					<p>${res[0].status} ${res[0].statusText}</p>
+					<p>${res[0].responseJSON.message}</p>
+					<br>
+			`);
 		}
 	});
 }
@@ -141,25 +157,9 @@ $('#login-form').submit(event => {
 	login(credentials);
 });
 
-$('#get').click(event => {
-	event.preventDefault();
-	$.ajax({
-		url: '/api/grades',
-		type: 'GET',
-		dataType: 'json',
-		contentType: 'application/json',
-		success: (data) => {
-			console.log(data);
-		},
-		error: (error) => {
-			console.log(error);
-		}
-	})
-})
-
+// Check if user has client auth token
 $(function() {
-	const token = localStorage.getItem('token');
-	if (token) {
+	if (localStorage.getItem('client_token')) {
 		location.href = '/home.html';
 	}
 });

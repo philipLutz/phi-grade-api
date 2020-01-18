@@ -6,19 +6,19 @@
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Unnecessarily Cryptic Climbing Grades">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <link rel="icon" href="https://raw.githubusercontent.com/philipLutz/phi-grade-api/master/public/html/phi.ico">
+    <link rel="icon" href="https://raw.githubusercontent.com/philipLutz/phi-grade-api/master/public/phi.ico">
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
     <link href="./css/landing.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 	<main>
-		<h1>&Phi;</h1>
+		<h1 id="phi">&Phi;</h1>
 
 		<div id="tagline">
 			Because rock climbing needs more people arguing about subjective grades...
 			<br>
 		</div>
-		
+
 		<div class="register-container">
 			<form id="register-form" aria-hidden="true" hidden>
 				<div>
@@ -61,6 +61,7 @@
 					</div>
 				</div>
 				<br>
+				<div id="register-fail"></div>
 				<div>
 					<button id="register-button" type="submit" value="Submit">Register</button>
 				</div>
@@ -83,13 +84,15 @@
 					</div>
 				</div>
 				<br>
+				<div id="login-fail"></div>
+				<br>
 				<div>
 					<button id="login-button" type="submit" value="Submit">Authenticate</button>
 				</div>
 				<br>
 			</form>
 		</div>
-		
+
 		<div class="container">
 			<button id="show-register">Register New User</button>
 		</div>
@@ -98,11 +101,7 @@
 			<button id="show-login">Authenticate Existing User</button>
 		</div>
 
-		<div class="container">
-			<button id="get">GET</button>
-		</div>
 	</main>
 	<script type="text/javascript" src="./js/users.js"></script>
-	<!-- <script type="text/javascript" src="./js/protected.js"></script> -->
 </body>
 </html>

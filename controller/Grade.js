@@ -8,6 +8,7 @@ const Auth = require('../auth/authentication.js');
 
 const Grade = {
 	getAllGrades(req, res, next) {
+		// console.log(req.headers.cookie);
 		queries.getAllGrades()
 		.then(function(grades) {
 			return res.status(200).send(grades);
@@ -79,7 +80,7 @@ const Grade = {
 				}	else {
 					return res.status(401).send({'message':'Unauthorized request to update grade'});
 				}
-				
+
 			})
 			.catch(function(error) {
 				next(error);

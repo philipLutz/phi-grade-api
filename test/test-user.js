@@ -24,15 +24,15 @@ describe('User Routes', function() {
 	    			const hashPassword = Auth.hashPassword('12345');
 			    	const testUser = [{
 			    		user_id: uuidv4(),
-						email: 'testUser@gmail.com',
-						password: hashPassword,
-						first_name: 'Test',
-						last_name: 'User',
-						bio: 'Test Bio',
-						private: 'false',
-						admin: 'false',
-						created_date: moment(new Date()),
-						modified_date: moment(new Date())
+							email: 'testUser@gmail.com',
+							password: hashPassword,
+							first_name: 'Test',
+							last_name: 'User',
+							bio: 'Test Bio',
+							private: 'false',
+							admin: 'false',
+							created_date: moment(new Date()),
+							modified_date: moment(new Date())
 			    	}];
 			    	queries.addUser(testUser)
 			    	.then(function() {
@@ -117,8 +117,12 @@ describe('User Routes', function() {
 			})
 			.end(function(err, res) {
 				res.should.have.status(200);
-				res.body.should.have.property('message');
-				res.body.message.should.equal('Login success');
+				res.body.should.be.a('array');
+				res.body[0].should.have.property('message');
+				res.body[0].message.should.equal('Login success');
+				res.body[1].should.have.property('client_token');
+				res.body[1].client_token.should.be.a('string');
+				res.headers['set-cookie'][0].should.be.a('string');
 				done();
 			});
 		});

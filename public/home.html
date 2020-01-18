@@ -6,17 +6,29 @@
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Unnecessarily Cryptic Climbing Grades">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <link rel="icon" href="https://raw.githubusercontent.com/philipLutz/phi-grade-api/master/public/html/phi.ico">
+    <link rel="icon" href="https://raw.githubusercontent.com/philipLutz/phi-grade-api/master/public/phi.ico">
     <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
     <link href="./css/home.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
     <main>
-       <h1>&Phi;</h1>
-        <h2>HOME</h2>
-        <button id="js-logout">Log Out</button> 
+			<nav>
+				<button id="show-profile">PROFILE</button>
+				<button id="show-encrypt">ENCRYPT</button>
+				<button id="show-decrypt">DECRYPT</button>
+				<button id="logout">EXIT</button>
+			</nav>
+      <h1 id="phi">&Phi;</h1>
+			<section id="display">
+				<section id="all_grades" aria-hidden="true" hidden></section>
+				<section id="profile" aria-hidden="true" hidden></section>
+				<section id="encrypt" aria-hidden="true" hidden></section>
+				<section id="decrypt" aria-hidden="true" hidden></section>
+				<section id="edit_grade" aria-hidden="true" hidden></section>
+				<section id="other_profile" aria-hidden="true" hidden></section>
+			</section>
     </main>
-    <!-- <script type="text/javascript" src="./js/users.js"></script> -->
     <script type="text/javascript" src="./js/protected.js"></script>
+		<script type="text/javascript" src="./js/grades.js"></script>
 </body>
 </html>
